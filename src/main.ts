@@ -71,7 +71,12 @@ async function bootstrap() {
     //   },
     //   SECURITY_NAME,
     // )
-    .addBearerAuth()
+    .addBearerAuth({
+      type: 'http',
+      scheme: 'bearer',
+      name: 'authorization',
+      'x-tokenName': BEARER_TOKEN,
+    })
     .setContact('Support', 'https://badge.com/support', '')
     .setLicense('MIT', 'https://opensource.org/licenses/MIT')
     .addSecurityRequirements(SECURITY_NAME)
