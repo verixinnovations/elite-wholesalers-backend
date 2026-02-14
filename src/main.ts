@@ -7,7 +7,7 @@ import {
   SwaggerCustomOptions,
   SwaggerModule,
 } from '@nestjs/swagger';
-import { apiReference } from '@scalar/nestjs-api-reference';
+
 import {
   BadRequestException,
   ClassSerializerInterceptor,
@@ -79,7 +79,7 @@ async function bootstrap() {
   const documentFactory = () => SwaggerModule.createDocument(app, config);
 
   SwaggerModule.setup('api/swagger-docs', app, documentFactory, swaggerOptions);
-
+  const { apiReference } = await import('@scalar/nestjs-api-reference');
   app.use(
     '/api/docs',
     apiReference({

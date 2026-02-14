@@ -1,4 +1,3 @@
-// import { Bookmark } from 'src/bookmarks/entities/bookmark.entity';
 import {
   BeforeInsert,
   BeforeUpdate,
@@ -7,10 +6,10 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { BcryptConfig } from 'src/common/utils/bcrypt.utils';
+import { BcryptConfig } from '../../../common/utils/bcrypt.utils';
 import { UserRoles } from '../dto/create-user.dto';
 import { Exclude } from 'class-transformer';
-import { Bookmark } from 'src/modules/jobs/entities/job-bookmark.entity';
+import { Bookmark } from '../../jobs/entities/job-bookmark.entity';
 
 export interface Location {
   country: string;

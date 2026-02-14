@@ -4,8 +4,8 @@
 // import { Profile, Strategy } from 'passport-google-oauth20';
 
 // import { AuthService } from '../auth.service';
-// import { EnvConfig } from 'src/common/config/env.config';
-// import { AuthResponse, JwtPayload } from 'src/common/interface';
+// import { EnvConfig } from '../common/config/env.config';
+// import { AuthResponse, JwtPayload } from '../common/interface';
 // import { JwtService } from '@nestjs/jwt';
 
 // @Injectable()

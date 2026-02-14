@@ -16,7 +16,7 @@ import {
   ApiParam,
   ApiBody,
 } from '@nestjs/swagger';
-import type { IRequest } from 'src/common/interface';
+import type { IRequest } from '../../common/interface';
 import { UserRoles } from '../user/dto/create-user.dto';
 import { Roles } from '../../common/decorators';
 import { CreateJobDto } from '../jobs/dto/create-job.dto';
