@@ -28,6 +28,8 @@ import {
   CompanyLogoDto,
   CreateCompanyDto,
 } from './dto/create-company.dto';
+import { Roles } from 'src/common/decorators';
+import { UserRoles } from '../user/dto/create-user.dto';
 // import { Company } from './entities/company.entity';
 
 @ApiTags('Companies') // Groups these endpoints in Swagger UI
@@ -37,6 +39,7 @@ export class CompanyController {
   constructor(private readonly companyService: CompanyService) {}
 
   @Post()
+  @Roles(UserRoles.RECRUITER)
   @ApiOperation({ summary: 'Create a new company' })
   @ApiBody({ type: CreateCompanyDto })
   @ApiResponse({
@@ -67,6 +70,7 @@ export class CompanyController {
 
   // GET /companies/owned
   @Get('owned')
+  @Roles(UserRoles.RECRUITER)
   @ApiOperation({ summary: 'Get current user company' })
   @ApiResponse({
     status: 200,
@@ -92,6 +96,7 @@ export class CompanyController {
 
   // PATCH /companies/update
   @Put('')
+  @Roles(UserRoles.RECRUITER)
   @ApiOperation({ summary: 'Update company details' })
   @ApiBody({ type: UpdateCompanyDto })
   @ApiResponse({ status: 200, description: 'Company updated successfully.' })
@@ -104,6 +109,7 @@ export class CompanyController {
 
   // POST /companies/upload-logo
   @Put(':companyId/upload-logo')
+  @Roles(UserRoles.RECRUITER)
   @UseInterceptors(FileInterceptor('logo'))
   @ApiOperation({ summary: 'Upload company logo' })
   @ApiConsumes('multipart/form-data')
@@ -119,6 +125,7 @@ export class CompanyController {
 
   // POST /companies/upload-cover
   @Put(':companyId/upload-cover')
+  @Roles(UserRoles.RECRUITER)
   @UseInterceptors(FileInterceptor('cover_image'))
   @ApiOperation({ summary: 'Upload cover image' })
   @ApiConsumes('multipart/form-data')

@@ -1,4 +1,9 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  NotFoundException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '../decorators';
 import { UserRoles } from '../../modules/user/dto/create-user.dto';
@@ -13,7 +18,6 @@ export class RolesGuard implements CanActivate {
       [context.getHandler(), context.getClass()],
     );
 
-    // Allow access if no specific roles are required (public routes)
     if (!requiredRoles) {
       return true;
     }
@@ -24,6 +28,12 @@ export class RolesGuard implements CanActivate {
       return true;
     }
 
-    return requiredRoles.some((role) => user?.role === role);
+    const hasRole = requiredRoles.some((role) => user?.role === role);
+
+    if (!hasRole) {
+      throw new NotFoundException('Requested resource does not exist!');
+    }
+
+    return true;
   }
 }

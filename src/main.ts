@@ -38,7 +38,6 @@ async function bootstrap() {
       whitelist: true,
       transform: true,
       exceptionFactory: (errors) => {
-        console.log({ errors });
         const formattedErrors = errors.map((error) => ({
           field: error.property,
           error: Object.values(error.constraints || {}),
@@ -53,7 +52,7 @@ async function bootstrap() {
   // app.useGlobalPipes(new ValidationPipe());
   const SECURITY_NAME = 'Access-Token';
   const BEARER_TOKEN =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImJkZy02aWJqMHRkMiIsInJvbGUiOiJVU0VSIiwic3ViIjoiZWJkYzA1ZjAtZWM4MS00YWUwLTk1OTQtMzU2YzNkNTg3YjQxIiwiaWF0IjoxNzcwOTE3NjA5fQ.8_o7t1wwZxARRCO9JFk1xi4TB-s6GdEVuCGyXlOvcC8';
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImJkZy1oYzlwazhhcyIsInJvbGUiOiJVU0VSIiwic3ViIjoiYTA2YjY1ZmUtOTIwNS00NGYxLTg4OWEtMTIxNjRiNmNiNTM5IiwiaWF0IjoxNzcxMDk3Nzc0fQ.4vHT955Ad1vn7fIdwqGpl_vtgXDJXSruneSClqsF7fA';
 
   const config = new DocumentBuilder()
     .setTitle('Badge API')

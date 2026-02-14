@@ -25,6 +25,10 @@ import { Bookmark } from '../../modules/jobs/entities/job-bookmark.entity';
         ssl: {
           rejectUnauthorized: false,
         },
+        extra: {
+          sslmode: 'verify-full',
+          uselibpqcompat: true,
+        },
       }),
     }),
   ],

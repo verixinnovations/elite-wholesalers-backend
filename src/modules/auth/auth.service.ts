@@ -63,6 +63,8 @@ export class AuthService {
   async validateUser(email: string, password: string): Promise<User | null> {
     const user = await this.userRepository.findOneBy({ email });
     if (user) {
+      if (!user.password)
+        throw new BadRequestException('Kindly reset your password to sign in.');
       const validPass = await BcryptConfig.comparePassword(
         password,
         user.password,
@@ -192,7 +194,6 @@ export class AuthService {
       await this.verificationRepository.delete({ userId: user.id }); // Clean up expired
       throw new BadRequestException('Verification code has expired.');
     }
-    console.log({ verificationRecord });
 
     user.password = await BcryptConfig.hashPassword(password);
     await this.userRepository.save(user);
