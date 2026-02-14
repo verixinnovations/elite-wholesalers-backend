@@ -8,7 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Job } from './job.entity';
-import { User } from 'src/modules/user/entities/user.entity';
+import { User } from '../../user/entities/user.entity';
 
 export enum ApplicationStatus {
   SUBMITTED = 'submitted',

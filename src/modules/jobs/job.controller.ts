@@ -10,8 +10,8 @@ import {
 } from '@nestjs/swagger';
 import { CreateApplicationDto, CreateJobDto } from './dto/create-job.dto';
 import { JobService } from './jobs.service';
-import type { IRequest } from 'src/common/interface';
-import { Public } from 'src/common/decorators';
+import type { IRequest } from '../../common/interface';
+import { Public } from '../../common/decorators';
 
 @ApiTags('Jobs')
 @Controller('jobs')

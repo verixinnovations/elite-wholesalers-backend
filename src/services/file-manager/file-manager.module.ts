@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { FileManagerService } from './file-manager.service';
 import { CloudinaryModule } from 'nestjs-cloudinary';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { EnvConfig } from 'src/common/config/env.config';
+import { EnvConfig } from '../../common/config/env.config';
 
 @Module({
   imports: [

@@ -1,4 +1,4 @@
-import { type Location, User } from 'src/modules/user/entities/user.entity';
+import { type Location, User } from '../../user/entities/user.entity';
 import {
   Entity,
   Column,

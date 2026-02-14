@@ -1,9 +1,9 @@
 import { ConfigService } from '@nestjs/config';
 import { Injectable } from '@nestjs/common';
 import { emailSenderConfig, emailTemplateBuilder } from './config';
-import { UserService } from 'src/modules/user/user.service';
+import { UserService } from '../../modules/user/user.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/modules/user/entities/user.entity';
+import { User } from '../../modules/user/entities/user.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()

@@ -6,7 +6,7 @@ import { User } from '../user/entities/user.entity';
 import { Job } from '../jobs/entities/job.entity';
 import { Company } from './entities/company.entity';
 import { UserModule } from '../user/user.module';
-import { FileManagerModule } from 'src/services/file-manager/file-manager.module';
+import { FileManagerModule } from '../../services/file-manager/file-manager.module';
 // import { JobModule } from '../jobs/job.module';
 
 @Module({

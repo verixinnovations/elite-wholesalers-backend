@@ -12,7 +12,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { OperationalStatus } from '../entities/company.entity';
-import { LocationDto } from 'src/modules/user/dto/create-user.dto';
+import { LocationDto } from '../../user/dto/create-user.dto';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 class CreateSocialMediaDto {

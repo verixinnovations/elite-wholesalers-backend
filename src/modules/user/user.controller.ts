@@ -19,7 +19,7 @@ import {
   ApiOperation,
 } from '@nestjs/swagger';
 import { UpdateRoleDto, UserProfilePhotoDto } from './dto/create-user.dto';
-import type { IRequest } from 'src/common/interface';
+import type { IRequest } from '../../common/interface';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiBearerAuth()

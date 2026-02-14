@@ -22,7 +22,7 @@ import {
 } from '@nestjs/swagger';
 import { CompanyService } from './company.service';
 import { UpdateCompanyDto } from './dto/update-company.dto';
-import type { IRequest } from 'src/common/interface';
+import type { IRequest } from '../../common/interface';
 import {
   CompanyCoverImageDto,
   CompanyLogoDto,

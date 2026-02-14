@@ -9,8 +9,8 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { JobApplication } from './job-applicants.entity';
-import { Company } from 'src/modules/company/entities/company.entity';
-import { User } from 'src/modules/user/entities/user.entity';
+import { Company } from '../../company/entities/company.entity';
+import { User } from '../../user/entities/user.entity';
 import { Bookmark } from './job-bookmark.entity';
 
 // --- Enums & Interfaces ---

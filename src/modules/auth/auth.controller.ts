@@ -7,11 +7,11 @@ import {
   ResetPasswordDto,
 } from './dto/auth.dto';
 import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
-import { LocalAuthGuard } from 'src/common/middleware/local-auth-guard.middleware';
-import { Public } from 'src/common/decorators';
-import { type IRequest } from 'src/common/interface';
-import { CreateUserDto } from 'src/modules/user/dto/create-user.dto';
-import { JwtAuthGuard } from 'src/common/middleware/jwt-auth-guard.middleware';
+import { LocalAuthGuard } from '../../common/middleware/local-auth-guard.middleware';
+import { Public } from '../../common/decorators';
+import { type IRequest } from '../../common/interface';
+import { CreateUserDto } from '../user/dto/create-user.dto';
+import { JwtAuthGuard } from '../../common/middleware/jwt-auth-guard.middleware';
 
 @Controller('auth')
 export class AuthController {

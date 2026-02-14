@@ -1,5 +1,5 @@
 // import { Schema } from 'mongoose';
-import { User, UserRoles } from 'src/modules/user/entities/user.entity';
+import { User, UserRoles } from '../../modules/user/entities/user.entity';
 import { Request } from 'express';
 
 type ShallowCopy<T> = {

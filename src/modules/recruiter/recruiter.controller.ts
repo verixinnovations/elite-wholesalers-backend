@@ -18,7 +18,7 @@ import {
 } from '@nestjs/swagger';
 import type { IRequest } from 'src/common/interface';
 import { UserRoles } from '../user/dto/create-user.dto';
-import { Roles } from 'src/common/decorators';
+import { Roles } from '../../common/decorators';
 import { CreateJobDto } from '../jobs/dto/create-job.dto';
 import { JobApplicantsDto } from '../jobs/dto/applicants.dto';
 import { UpdateJobDto } from '../jobs/dto/update-job.dto';

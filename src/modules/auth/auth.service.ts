@@ -5,18 +5,18 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { AuthResponse, JwtPayload } from 'src/common/interface';
-import { User } from 'src/modules/user/entities/user.entity';
+import { AuthResponse, JwtPayload } from '../../common/interface';
+import { User } from '../user/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from 'src/modules/user/user.service';
-import { BcryptConfig } from 'src/common/utils/bcrypt.utils';
-import { CreateUserDto } from 'src/modules/user/dto/create-user.dto';
-import { EmailService } from 'src/services/emails/email.service';
+import { UserService } from '../user/user.service';
+import { BcryptConfig } from '../../common/utils/bcrypt.utils';
+import { CreateUserDto } from '../user/dto/create-user.dto';
+import { EmailService } from '../../services/emails/email.service';
 import { OAuth2Client } from 'google-auth-library';
 import { Verification } from './entities/auth.entity';
-import { uniqueNumber } from 'src/common/utils/unique-numbers';
+import { uniqueNumber } from '../../common/utils/unique-numbers';
 import { ResetPasswordDto } from './dto/auth.dto';
 
 @Injectable()

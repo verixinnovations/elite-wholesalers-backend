@@ -6,7 +6,7 @@ import { User } from 'src/modules/user/entities/user.entity';
 import { UserModule } from 'src/modules/user/user.module';
 import { LocalStrategy } from './utils/local.strategy';
 import { JwtStrategy } from './utils/jwt.stategy';
-import { EmailModule } from 'src/services/emails/email.module';
+import { EmailModule } from '../../services/emails/email.module';
 import { Verification } from './entities/auth.entity';
 
 @Module({

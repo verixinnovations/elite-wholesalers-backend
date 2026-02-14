@@ -9,10 +9,10 @@ import { UpdateCompanyDto } from './dto/update-company.dto';
 import { Company } from './entities/company.entity';
 import { User } from '../user/entities/user.entity';
 import { CreateCompanyDto } from './dto/create-company.dto';
-import { uniqueNumber } from 'src/common/utils/unique-numbers';
+import { uniqueNumber } from '../../common/utils/unique-numbers';
 import { UserService } from '../user/user.service';
 import { UserRoles } from '../user/dto/create-user.dto';
-import { FileManagerService } from 'src/services/file-manager/file-manager.service';
+import { FileManagerService } from '../../services/file-manager/file-manager.service';
 
 @Injectable()
 export class CompanyService {
