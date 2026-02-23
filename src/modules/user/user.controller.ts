@@ -35,7 +35,7 @@ export class UserController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get user by ID' })
-  async findOne(@Param('id') id: number) {
+  async findOne(@Param('id') id: string) {
     return this.userService.viewUser(id);
   }
 

@@ -52,8 +52,7 @@ async function bootstrap() {
   // app.useGlobalPipes(new ValidationPipe());
   const SECURITY_NAME = 'Access-Token';
   const BEARER_TOKEN =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImJkZy1oYzlwazhhcyIsInJvbGUiOiJVU0VSIiwic3ViIjoiYTA2YjY1ZmUtOTIwNS00NGYxLTg4OWEtMTIxNjRiNmNiNTM5IiwiaWF0IjoxNzcxMDk3Nzc0fQ.4vHT955Ad1vn7fIdwqGpl_vtgXDJXSruneSClqsF7fA';
-
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImJkZy1oYzlwazhhcyIsInJvbGUiOiJSRUNSVUlURVIiLCJzdWIiOiJhMDZiNjVmZS05MjA1LTQ0ZjEtODg5YS0xMjE2NGI2Y2I1MzkiLCJpYXQiOjE3NzE3OTIzNjh9.GgH7SjUHZiJTMAZPPLIJmzWMXZEFc2o6WB0KRhssD_M';
   const config = new DocumentBuilder()
     .setTitle('Badge API')
     .setDescription('Badge API documentation')

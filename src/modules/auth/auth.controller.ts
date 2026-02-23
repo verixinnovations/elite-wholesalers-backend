@@ -17,18 +17,17 @@ import { JwtAuthGuard } from '../../common/middleware/jwt-auth-guard.middleware'
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @ApiOperation({ summary: 'Create Account' })
   @Post('register')
   @Public()
+  @ApiOperation({ summary: 'Create Account' })
   create(@Body() createUserDto: CreateUserDto) {
     return this.authService.createUser(createUserDto);
   }
 
-  @Public()
-  @ApiOperation({ summary: 'Login' })
-  @Public()
   @Post('login')
+  @Public()
   @UseGuards(LocalAuthGuard)
+  @ApiOperation({ summary: 'Login' })
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   login(@Req() req: IRequest, @Body() body: LoginDto) {
     return this.authService.login(req.user);
