@@ -15,30 +15,25 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   }
 
   async canActivate(context: ExecutionContext): Promise<any> {
+    return await super.canActivate(context);
+  }
+
+  handleRequest(err: any, user: any, info: any, context: ExecutionContext) {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);
 
-    if (isPublic) {
-      return true;
-    }
-
-    return await super.canActivate(context); // Regular flow for private routes
-  }
-
-  handleRequest(err: any, user: any, info: any) {
-    if (
+    if (isPublic && !user) {
+      return null;
+    } else if (
       info?.name === 'TokenExpiredError' ||
       info?.name === 'JsonWebTokenError'
     ) {
       throw new ForbiddenException('Invalid token');
-    }
-
-    if (err || !user) {
+    } else if (err || !user) {
       throw new UnauthorizedException('Unauthorized');
     }
-
     return user;
   }
 }

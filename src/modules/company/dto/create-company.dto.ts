@@ -109,7 +109,7 @@ export class CreateCompanyDto {
     type: LocationDto,
     description: 'Physical address of the company',
     example: {
-      address: '123 Tech Street',
+      street: '123 Tech Street',
       city: 'Lagos',
       state: 'Lagos',
       country: 'Nigeria',

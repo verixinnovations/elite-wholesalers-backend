@@ -35,19 +35,6 @@ export class JobController {
     return this.jobService.findAllOpenJobs(search);
   }
 
-  @Get(':id')
-  @Public()
-  @ApiOperation({ summary: 'Get single job details' })
-  @ApiParam({ name: 'id', description: 'Job ID' })
-  @ApiResponse({
-    status: 200,
-    description: 'Job details retrieved.',
-    type: CreateJobDto,
-  })
-  findOnePublic(@Param('id') id: string) {
-    return this.jobService.findOnePublic(id);
-  }
-
   // ==========================================
   // APPLICANT ROUTES (User actions)
   // ==========================================
@@ -70,7 +57,7 @@ export class JobController {
     return this.jobService.applyForJob(req.user, jobId, dto);
   }
 
-  @Get('/applications')
+  @Get('applications')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get my job applications' })
   @ApiResponse({
@@ -100,5 +87,18 @@ export class JobController {
   })
   getMyBookmarks(@Req() req: IRequest) {
     return this.jobService.getMyBookmarkedJobs(req.user.id);
+  }
+
+  @Get(':id')
+  @Public()
+  @ApiOperation({ summary: 'Get single job details' })
+  @ApiParam({ name: 'id', description: 'Job ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Job details retrieved.',
+    type: CreateJobDto,
+  })
+  findOnePublic(@Param('id') id: string, @Req() req: IRequest) {
+    return this.jobService.findOnePublic(id, req?.user?.id);
   }
 }

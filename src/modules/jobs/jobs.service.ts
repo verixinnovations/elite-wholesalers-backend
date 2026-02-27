@@ -53,18 +53,14 @@ export class JobService {
   }
 
   async findMyJobs(user: User) {
-    // Get jobs posted by this specific user (Recruiter view)
     const jobs = await this.jobRepository.find({
       where: { creator: { id: user.id } },
-      relations: ['applications'], // Load count of applicants
+      relations: ['applications', 'company'],
       order: { posted_on: 'DESC' },
     });
-
-    // Add applicant count explicitly if needed (though array length works)
-    return jobs.map((job) => ({
-      ...job,
-      applicants_count: job.applications.length,
-    }));
+    return jobs.map((job) =>
+      Object.assign(job, { applicantCount: job.applications.length }),
+    );
   }
 
   async findMySingleJob(user: User, jobId: string) {
@@ -130,15 +126,32 @@ export class JobService {
     });
   }
 
-  async findOnePublic(jobId: string) {
+  async findOnePublic(jobId: string, userId?: string) {
+    let isApplied = false;
+    let isBookmarked = false;
+
+    if (userId) {
+      const applicant = await this.applicationRepository.findOne({
+        where: { jobId: jobId, userId: userId },
+      });
+      if (applicant) {
+        isApplied = true;
+      }
+      const bookmark = await this.bookmarkRepository.findOne({
+        where: { jobId: jobId, userId: userId },
+      });
+      if (bookmark) {
+        isBookmarked = true;
+      }
+    }
+
     const job = await this.jobRepository.findOne({
       where: { id: jobId },
       relations: ['company', 'creator'],
     });
     if (!job) throw new NotFoundException('Job not found');
-    return job;
+    return Object.assign(job, { isApplied, isBookmarked });
   }
-
   // --- THE CORE APPLY LOGIC ---
 
   async applyForJob(user: User, jobId: string, dto: CreateApplicationDto) {
@@ -217,7 +230,7 @@ export class JobService {
 
     return bookmarks.map((bookmark) => ({
       ...bookmark.job,
-      isBookmarked: true, // We know they are bookmarked because they're in this list
+      isBookmarked: true,
       bookmarkedAt: bookmark.createdAt,
     }));
   }

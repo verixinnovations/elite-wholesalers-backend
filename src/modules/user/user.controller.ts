@@ -33,10 +33,10 @@ export class UserController {
     return this.userService.findAllUser();
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Get user by ID' })
-  async findOne(@Param('id') id: string) {
-    return this.userService.viewUser(id);
+  @Get('profile-summary')
+  @ApiOperation({ summary: 'Get user profile summary' })
+  getProfileSummary(@Req() req: IRequest) {
+    return this.userService.getUserProfileSummary(req.user.id);
   }
 
   @Patch('picture')
@@ -67,5 +67,11 @@ export class UserController {
   @ApiOperation({ summary: 'Update User Role ID' })
   updateRole(@Req() req: IRequest, @Body() userRole: UpdateRoleDto) {
     return this.userService.updateUserRole(req.user.id, userRole.role);
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get user by ID' })
+  async findOne(@Param('id') id: string) {
+    return this.userService.viewUser(id);
   }
 }

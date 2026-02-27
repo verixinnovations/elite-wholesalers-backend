@@ -6,14 +6,29 @@ import { User } from './entities/user.entity';
 import { FileManagerService } from '../../services/file-manager/file-manager.service';
 import { UserRoles } from './dto/create-user.dto';
 import { Company } from '../company/entities/company.entity';
+import { Bookmark } from '../jobs/entities/job-bookmark.entity';
+import {
+  ApplicationStatus,
+  JobApplication,
+} from '../jobs/entities/job-applicants.entity';
+import { Job, JobStatus } from '../jobs/entities/job.entity';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly fileManagerService: FileManagerService,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
+
     @InjectRepository(Company)
     private readonly companyRepository: Repository<Company>,
+
+    @InjectRepository(Job) private readonly jobRepository: Repository<Job>,
+
+    @InjectRepository(JobApplication)
+    private readonly applicationRepository: Repository<JobApplication>,
+
+    @InjectRepository(Bookmark)
+    private readonly bookmarkRepository: Repository<Bookmark>,
   ) {}
 
   findAllUser(): Promise<User[]> {
@@ -33,10 +48,55 @@ export class UserService {
     return user;
   }
 
-  async viewUser(id: string) {
-    return this.findOne({ id });
+  async viewUser(userId: string) {
+    return this.findOne({ id: userId });
   }
 
+  async getUserProfileSummary(userId: string) {
+    await this.findOne({ id: userId });
+    const [
+      totalAppliedJobs,
+      totalBookmarkedJobs,
+      totalPostedJobs,
+      totalActivePostedJobs,
+      totalApplicants,
+      totalHired,
+      totalOffers,
+    ] = await Promise.all([
+      this.applicationRepository.count({ where: { userId } }),
+      this.bookmarkRepository.count({ where: { userId } }),
+      this.jobRepository.count({ where: { creator: { id: userId } } }),
+      this.jobRepository.count({
+        where: { creator: { id: userId }, job_status: JobStatus.OPEN },
+      }),
+      this.applicationRepository.count({
+        where: { job: { creator: { id: userId } } },
+      }),
+      this.applicationRepository.count({
+        where: {
+          job: { creator: { id: userId } },
+          status: ApplicationStatus.ACCEPTED,
+        },
+      }),
+      this.applicationRepository.count({
+        where: { userId, status: ApplicationStatus.ACCEPTED },
+      }),
+    ]);
+
+    return {
+      totalAppliedJobs,
+      totalBookmarkedJobs,
+      totalPostedJobs,
+      totalActivePostedJobs,
+      totalApplicants,
+      totalHired,
+      totalOffers,
+      successRate:
+        totalAppliedJobs > 0
+          ? Math.round((totalOffers / totalAppliedJobs) * 100)
+          : 0,
+    };
+  }
   async updateUser(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { email, password, username, role, ...data } = updateUserDto;

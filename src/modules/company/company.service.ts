@@ -58,7 +58,7 @@ export class CompanyService {
   async findMyCompany(user: User): Promise<Company> {
     const company = await this.companyRepository.findOne({
       where: { owner: { id: user.id } },
-      relations: ['owner'],
+      // relations: ['owner'],
     });
 
     if (!company) {
