@@ -20,7 +20,10 @@ import type { IRequest } from '../../common/interface';
 import { UserRoles } from '../user/dto/create-user.dto';
 import { Roles } from '../../common/decorators';
 import { CreateJobDto } from '../jobs/dto/create-job.dto';
-import { JobApplicantsDto } from '../jobs/dto/applicants.dto';
+import {
+  JobApplicantsDto,
+  RecruiterUpdateApplicationDto,
+} from '../jobs/dto/applicants.dto';
 import { UpdateJobDto } from '../jobs/dto/update-job.dto';
 import { JobStatus } from '../jobs/entities/job.entity';
 import { JobService } from '../jobs/jobs.service';
@@ -60,6 +63,49 @@ export class RecruiterController {
     return this.jobService.getJobApplicants(req.user.id, jobId);
   }
 
+  @Get('jobs/:jobId/applicants/:applicantId')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get a single job applicant' })
+  @ApiResponse({
+    status: 200,
+    description: 'Single job applicant retrieved.',
+    type: JobApplicantsDto,
+  })
+  getJobApplicant(
+    @Req() req: IRequest,
+    @Param('jobId') jobId: string,
+    @Param('applicantId') applicantId: string,
+  ) {
+    return this.jobService.getASingleJobApplicant(
+      req.user.id,
+      jobId,
+      applicantId,
+    );
+  }
+
+  @Put('jobs/:jobId/applicants/:applicantId')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update a single job applicant' })
+  @ApiBody({ type: RecruiterUpdateApplicationDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Single job applicant updated successfully.',
+    type: JobApplicantsDto,
+  })
+  updateJobApplicant(
+    @Req() req: IRequest,
+    @Body() data: RecruiterUpdateApplicationDto,
+    @Param('jobId') jobId: string,
+    @Param('applicantId') applicantId: string,
+  ) {
+    return this.jobService.updateJobApplicant(
+      req.user.id,
+      jobId,
+      applicantId,
+      data,
+    );
+  }
+
   @Get('jobs/:id')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get a single job posted by my company' })
@@ -73,7 +119,7 @@ export class RecruiterController {
     return this.jobService.findMySingleJob(req.user, id);
   }
 
-  @Put('job/:id')
+  @Put('jobs/:id')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update job details' })
   @ApiParam({ name: 'id', description: 'Job ID' })
@@ -87,7 +133,7 @@ export class RecruiterController {
     return this.jobService.update(req.user, id, updateJobDto);
   }
 
-  @Delete('job/:id')
+  @Delete('jobs/:id')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete a job' })
   @ApiParam({ name: 'id', description: 'Job ID' })
@@ -96,7 +142,7 @@ export class RecruiterController {
     return this.jobService.delete(req.user, id);
   }
 
-  @Put('job/:id/status')
+  @Put('jobs/:id/status')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update job status (e.g., OPEN, CLOSED)' })
   @ApiParam({ name: 'id', description: 'Job ID' })

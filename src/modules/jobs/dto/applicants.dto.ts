@@ -5,29 +5,28 @@ import {
   IsOptional,
   IsString,
   IsUUID,
-  IsArray,
-  ValidateNested,
   IsNumber,
   IsDateString,
+  MaxLength,
 } from 'class-validator';
 import { Type } from 'class-transformer'; // Update path as needed
 import { ApplicationStatus } from '../entities/job-applicants.entity';
 
 // 1. Helper DTO for the JSONB column (InterviewFeedback)
-export class InterviewFeedbackDto {
+export class InterviewDto {
   @ApiProperty({ example: '2025-12-28T10:00:00Z' })
   @IsDateString()
   date: Date;
 
   @ApiProperty({ example: 'Candidate showed strong technical skills.' })
   @IsString()
-  @IsNotEmpty()
-  comments: string;
-
-  @ApiPropertyOptional({ example: 8.5 })
   @IsOptional()
-  @IsNumber()
-  score?: number;
+  note?: string;
+
+  @ApiProperty({ example: 'https://meet.google.com/jhfk-kfh-llj' })
+  @IsString()
+  @IsNotEmpty()
+  meeting_link: string;
 }
 
 // 2. Main Create DTO
@@ -58,14 +57,9 @@ export class JobApplicantsDto {
   @IsString()
   cover_letter?: string;
 
-  // --- Administrative Fields (Optional on Create) ---
-
-  @ApiPropertyOptional({ type: [InterviewFeedbackDto] })
+  @ApiPropertyOptional({ type: InterviewDto })
   @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => InterviewFeedbackDto)
-  interview_feedback?: InterviewFeedbackDto[];
+  interview_details?: InterviewDto;
 
   @ApiPropertyOptional({ default: 0 })
   @IsOptional()
@@ -76,13 +70,42 @@ export class JobApplicantsDto {
   @IsOptional()
   @IsString()
   notes?: string;
+}
 
+export class CreateApplicationDto {
   @ApiPropertyOptional({
-    type: [Date],
-    example: ['2025-12-30T09:00:00Z'],
+    example: 'I am very interested in this role because...',
+    description: 'Optional cover letter (max 5000 chars)',
   })
   @IsOptional()
-  @IsArray()
-  @IsDateString({}, { each: true })
-  interview_dates?: Date[];
+  @IsString()
+  @MaxLength(5000, {
+    message: 'Cover letter is too long (max 5000 characters)',
+  })
+  cover_letter?: string;
+}
+export class RecruiterUpdateApplicationDto {
+  @ApiPropertyOptional({
+    enum: ApplicationStatus,
+    default: ApplicationStatus.SUBMITTED,
+    example: ApplicationStatus.SUBMITTED,
+  })
+  @IsOptional()
+  @IsEnum(ApplicationStatus)
+  status: ApplicationStatus;
+
+  @ApiPropertyOptional({ type: InterviewDto })
+  @IsOptional()
+  @Type(() => InterviewDto)
+  interview_details?: InterviewDto;
+
+  @ApiPropertyOptional({ default: 0 })
+  @IsOptional()
+  @IsNumber()
+  evaluation_score?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  notes?: string;
 }

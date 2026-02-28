@@ -19,10 +19,10 @@ export enum ApplicationStatus {
 }
 
 // Interface for the JSONB column
-export interface InterviewFeedback {
+export interface InterviewDetails {
   date: Date;
-  comments: string;
-  score?: number;
+  note?: string;
+  meeting_link: string;
 }
 
 @Entity('job_applications')
@@ -61,18 +61,14 @@ export class JobApplication {
   cover_letter: string;
 
   // Stores an array of feedback objects [{date:..., comments:...}]
-  @Column({ type: 'jsonb', nullable: true, default: [] })
-  interview_feedback: InterviewFeedback[];
+  @Column({ type: 'jsonb', nullable: true })
+  interview_details: InterviewDetails;
 
   @Column({ type: 'float', default: 0 })
   evaluation_score: number;
 
   @Column({ type: 'text', default: '' })
   notes: string;
-
-  // Stores dates for scheduled interviews
-  @Column({ type: 'timestamp', array: true, default: [] })
-  interview_dates: Date[];
 
   @CreateDateColumn()
   date_applied: Date;

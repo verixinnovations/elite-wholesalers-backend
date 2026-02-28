@@ -7,6 +7,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { JobApplication } from './job-applicants.entity';
 import { Company } from '../../company/entities/company.entity';
@@ -59,6 +60,12 @@ export interface RequiredSkill {
 }
 
 @Entity('jobs')
+@Index([
+  'job_title',
+  'job_description',
+  'job_location_type',
+  'experience_level',
+])
 export class Job {
   @PrimaryGeneratedColumn('uuid')
   id: string;

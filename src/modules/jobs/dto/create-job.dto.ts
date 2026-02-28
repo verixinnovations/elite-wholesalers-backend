@@ -1,7 +1,5 @@
 import { Transform, Type } from 'class-transformer';
 import {
-  IsOptional,
-  MaxLength,
   IsArray,
   IsDateString,
   IsEnum,
@@ -11,8 +9,10 @@ import {
   Min,
   ValidateNested,
   ArrayNotEmpty,
+  IsOptional,
+  IsInt,
 } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import {
   ExperienceLevel,
   JobLocationType,
@@ -156,15 +156,40 @@ export class CreateJobDto {
   benefits: string[];
 }
 
-export class CreateApplicationDto {
-  @ApiPropertyOptional({
-    example: 'I am very interested in this role because...',
-    description: 'Optional cover letter (max 5000 chars)',
-  })
+export class JobSearchDto {
   @IsOptional()
   @IsString()
-  @MaxLength(5000, {
-    message: 'Cover letter is too long (max 5000 characters)',
-  })
-  cover_letter?: string;
+  query?: string;
+
+  @IsOptional()
+  @IsEnum(JobLocationType)
+  locationType?: JobLocationType;
+
+  @IsOptional()
+  @IsString()
+  jobLocation?: string;
+
+  @IsOptional()
+  @IsEnum(ExperienceLevel)
+  experience?: ExperienceLevel;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  minSalary?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  maxSalary?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  page?: number = 1;
+
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  limit?: number = 10;
 }

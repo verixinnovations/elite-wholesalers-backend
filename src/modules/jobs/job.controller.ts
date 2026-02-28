@@ -8,10 +8,11 @@ import {
   ApiParam,
   ApiBody,
 } from '@nestjs/swagger';
-import { CreateApplicationDto, CreateJobDto } from './dto/create-job.dto';
+import { CreateJobDto, JobSearchDto } from './dto/create-job.dto';
 import { JobService } from './jobs.service';
 import type { IRequest } from '../../common/interface';
 import { Public } from '../../common/decorators';
+import { CreateApplicationDto } from './dto/applicants.dto';
 
 @ApiTags('Jobs')
 @Controller('jobs')
@@ -31,7 +32,7 @@ export class JobController {
     description: 'List of open jobs.',
     type: [CreateJobDto],
   })
-  findAll(@Query('search') search: string) {
+  findAll(@Query() search: JobSearchDto) {
     return this.jobService.findAllOpenJobs(search);
   }
 

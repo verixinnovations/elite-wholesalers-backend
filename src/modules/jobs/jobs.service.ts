@@ -5,10 +5,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, ILike } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Job, JobStatus } from './entities/job.entity';
 
-import { CreateApplicationDto, CreateJobDto } from './dto/create-job.dto';
+import { CreateJobDto, JobSearchDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
 import {
   ApplicationStatus,
@@ -17,6 +17,10 @@ import {
 import { User } from '../user/entities/user.entity';
 import { CompanyService } from '../company/company.service';
 import { Bookmark } from './entities/job-bookmark.entity';
+import {
+  CreateApplicationDto,
+  RecruiterUpdateApplicationDto,
+} from './dto/applicants.dto';
 
 @Injectable()
 export class JobService {
@@ -59,18 +63,18 @@ export class JobService {
       order: { posted_on: 'DESC' },
     });
     return jobs.map((job) =>
-      Object.assign(job, { applicantCount: job.applications.length }),
+      Object.assign(job, { applicants_count: job.applications.length }),
     );
   }
 
   async findMySingleJob(user: User, jobId: string) {
     const job = await this.jobRepository.findOne({
       where: { id: jobId, creator: { id: user.id } },
-      relations: ['applications', 'applications.user'], // Load detailed applicants
+      relations: ['applications', 'applications.user', 'company'],
     });
 
     if (!job) throw new NotFoundException('Job not found or access denied');
-    return job;
+    return Object.assign(job, { applicants_count: job.applications.length });
   }
 
   async update(user: User, jobId: string, updateJobDto: UpdateJobDto) {
@@ -113,17 +117,86 @@ export class JobService {
 
   // --- PUBLIC / APPLICANT ACTIONS ---
 
-  async findAllOpenJobs(query?: string) {
-    const whereCondition: any = { job_status: JobStatus.OPEN };
+  async findAllOpenJobs(searchDto: JobSearchDto) {
+    const {
+      query,
+      locationType,
+      jobLocation,
+      experience,
+      minSalary,
+      maxSalary,
+      page = 1,
+      limit = 10,
+    } = searchDto;
+
+    const queryBuilder = this.jobRepository
+      .createQueryBuilder('job')
+      .leftJoinAndSelect('job.company', 'company')
+      .leftJoin('job.creator', 'creator')
+      .addSelect([
+        'creator.id',
+        'creator.firstname',
+        'creator.lastname',
+        'creator.picture',
+      ])
+      .where('job.job_status = :status', { status: JobStatus.OPEN });
+
+    // 1. Full-text search on Title or Description
     if (query) {
-      whereCondition.job_title = ILike(`%${query}%`);
+      queryBuilder.andWhere(
+        '(job.job_title ILIKE :query OR job.job_description ILIKE :query)',
+        { query: `%${query}%` },
+      );
     }
-    return this.jobRepository.find({
-      where: whereCondition,
-      relations: ['company', 'creator'],
-      order: { posted_on: 'DESC' },
-      take: 50,
-    });
+
+    // 2. Enum Filters (Simple equality)
+    if (locationType) {
+      queryBuilder.andWhere('job.job_location_type = :locationType', {
+        locationType,
+      });
+    }
+
+    if (experience) {
+      queryBuilder.andWhere('job.experience_level = :experience', {
+        experience,
+      });
+    }
+
+    if (jobLocation) {
+      queryBuilder.andWhere('company.city = :jobLocation', {
+        jobLocation,
+      });
+    }
+
+    if (minSalary !== undefined) {
+      queryBuilder.andWhere(
+        "CAST(job.salary->>'value' AS NUMERIC) >= :minSalary",
+        { minSalary },
+      );
+    }
+
+    if (maxSalary !== undefined) {
+      queryBuilder.andWhere(
+        "CAST(job.salary->>'value' AS NUMERIC) <= :maxSalary",
+        { maxSalary },
+      );
+    }
+
+    // 4. Pagination & Ordering
+    const skippedItems = (page - 1) * limit;
+    queryBuilder
+      .orderBy('job.posted_on', 'DESC')
+      .skip(skippedItems)
+      .take(limit);
+
+    const [items, total] = await queryBuilder.getManyAndCount();
+
+    return {
+      items,
+      total,
+      page,
+      lastPage: Math.ceil(total / limit),
+    };
   }
 
   async findOnePublic(jobId: string, userId?: string) {
@@ -201,9 +274,47 @@ export class JobService {
   async getJobApplicants(userId: string, jobId: string) {
     return this.applicationRepository.find({
       where: { job: { id: jobId, creator: { id: userId } } },
-      // relations: [ 'job', 'job.company'],
+      relations: ['job', 'user'],
       order: { date_applied: 'DESC' },
     });
+  }
+  async getASingleJobApplicant(
+    userId: string,
+    jobId: string,
+    applicantId: string,
+  ) {
+    return this.applicationRepository.findOne({
+      where: {
+        job: { id: jobId, creator: { id: userId } },
+        userId: applicantId,
+      },
+      relations: ['job', 'user'],
+      order: { date_applied: 'DESC' },
+    });
+  }
+
+  async updateJobApplicant(
+    recruiterId: string, // From req.user.id
+    jobId: string,
+    applicantId: string,
+    data: RecruiterUpdateApplicationDto,
+  ) {
+    const application = await this.applicationRepository.findOne({
+      where: {
+        userId: applicantId,
+        job: {
+          id: jobId,
+          creator: { id: recruiterId },
+        },
+      },
+    });
+    if (!application) {
+      throw new NotFoundException(
+        'Application not found or unauthorized access',
+      );
+    }
+    Object.assign(application, data);
+    return await this.applicationRepository.save(application);
   }
 
   async toggleBookmark(userId: string, jobId: string) {
