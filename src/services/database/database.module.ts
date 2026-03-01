@@ -8,6 +8,7 @@ import { Company } from '../../modules/company/entities/company.entity';
 import { Job } from '../../modules/jobs/entities/job.entity';
 import { JobApplication } from '../../modules/jobs/entities/job-applicants.entity';
 import { Bookmark } from '../../modules/jobs/entities/job-bookmark.entity';
+import { JobRejection } from 'src/modules/jobs/entities/job-rejected.entity';
 
 @Module({
   imports: [
@@ -18,7 +19,15 @@ import { Bookmark } from '../../modules/jobs/entities/job-bookmark.entity';
         type: 'postgres',
         url: configService.get<string>('DATABASE_URL'),
         autoLoadEntities: true,
-        entities: [User, Verification, Company, Job, Bookmark, JobApplication],
+        entities: [
+          User,
+          Verification,
+          Company,
+          Job,
+          Bookmark,
+          JobApplication,
+          JobRejection,
+        ],
         synchronize: configService.get<boolean>('DB_SYNC', true),
         dropSchema: false,
         logging: false,

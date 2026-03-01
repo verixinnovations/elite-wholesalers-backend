@@ -9,12 +9,20 @@ import { JobApplication } from './entities/job-applicants.entity';
 import { UserModule } from '../user/user.module';
 import { CompanyModule } from '../company/company.module';
 import { Bookmark } from './entities/job-bookmark.entity';
+import { JobRejection } from './entities/job-rejected.entity';
 
 @Module({
   imports: [
     CompanyModule,
     UserModule,
-    TypeOrmModule.forFeature([User, Job, JobApplication, Company, Bookmark]),
+    TypeOrmModule.forFeature([
+      User,
+      Job,
+      JobApplication,
+      JobRejection,
+      Company,
+      Bookmark,
+    ]),
   ],
   controllers: [JobController],
   providers: [JobService],

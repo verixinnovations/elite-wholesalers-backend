@@ -58,6 +58,39 @@ export class JobController {
     return this.jobService.applyForJob(req.user, jobId, dto);
   }
 
+  @Get('reject')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get rejected jobs' })
+  rejectJobs(@Req() req: IRequest) {
+    return this.jobService.getrejectedJobs(req.user);
+  }
+
+  @Post(':id/reject')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Reject a job' })
+  @ApiParam({ name: 'id', description: 'Job ID to reject' })
+  @ApiBody({ type: CreateApplicationDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Application rejected successfully.',
+    type: CreateJobDto,
+  })
+  rejectJob(@Req() req: IRequest, @Param('id') jobId: string) {
+    return this.jobService.rejectJob(req.user, jobId);
+  }
+
+  @Get('swippable')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get swippable jobs' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of swippable jobs.',
+    type: [CreateJobDto],
+  })
+  getSwippableJobs(@Req() req: IRequest) {
+    return this.jobService.getSwippableJobs(req.user);
+  }
+
   @Get('applications')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get my job applications' })
@@ -68,6 +101,18 @@ export class JobController {
   })
   getMyApplications(@Req() req: IRequest) {
     return this.jobService.getAppliedJobs(req.user);
+  }
+
+  @Get('applications/:jobId')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get single job application' })
+  @ApiResponse({
+    status: 200,
+    description: 'Get an applied job.',
+    type: [CreateJobDto],
+  })
+  getMyJobApplication(@Req() req: IRequest, @Param('jobId') jobId: string) {
+    return this.jobService.getSingleAppliedJob(req.user, jobId);
   }
 
   @Post(':id/bookmark')

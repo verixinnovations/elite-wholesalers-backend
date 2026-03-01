@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Brackets, Repository } from 'typeorm';
 import { Job, JobStatus } from './entities/job.entity';
 
 import { CreateJobDto, JobSearchDto } from './dto/create-job.dto';
@@ -21,6 +21,7 @@ import {
   CreateApplicationDto,
   RecruiterUpdateApplicationDto,
 } from './dto/applicants.dto';
+import { JobRejection } from './entities/job-rejected.entity';
 
 @Injectable()
 export class JobService {
@@ -30,6 +31,9 @@ export class JobService {
 
     @InjectRepository(JobApplication)
     private readonly applicationRepository: Repository<JobApplication>,
+
+    @InjectRepository(JobRejection)
+    private readonly rejectionRepository: Repository<JobRejection>,
 
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
@@ -115,12 +119,11 @@ export class JobService {
     return this.jobRepository.save(job);
   }
 
-  // --- PUBLIC / APPLICANT ACTIONS ---
-
   async findAllOpenJobs(searchDto: JobSearchDto) {
     const {
       query,
       locationType,
+      jobType,
       jobLocation,
       experience,
       minSalary,
@@ -161,11 +164,22 @@ export class JobService {
         experience,
       });
     }
+    if (jobType) {
+      queryBuilder.andWhere('job.job_type = :jobType', {
+        jobType,
+      });
+    }
 
     if (jobLocation) {
-      queryBuilder.andWhere('company.city = :jobLocation', {
-        jobLocation,
-      });
+      queryBuilder.andWhere(
+        new Brackets((qb) => {
+          qb.where("company.address->>'city' ILIKE :loc", {
+            loc: `%${jobLocation}%`,
+          }).orWhere("company.address->>'state' ILIKE :loc", {
+            loc: `%${jobLocation}%`,
+          });
+        }),
+      );
     }
 
     if (minSalary !== undefined) {
@@ -259,7 +273,44 @@ export class JobService {
 
     return this.applicationRepository.save(application);
   }
+  async getSwippableJobs(user: User) {
+    const queryBuilder = this.jobRepository.createQueryBuilder('job');
 
+    const appliedJobIdsSubQuery = queryBuilder
+      .subQuery()
+      .select('app.jobId')
+      .from(JobApplication, 'app') // Use the Entity class here
+      .where('app.userId = :userId')
+      .getQuery();
+
+    return (
+      queryBuilder
+        .leftJoinAndSelect('job.company', 'company')
+        // 2. Filter: Only Open jobs NOT in the subquery
+        .where('job.job_status = :status', { status: JobStatus.OPEN })
+        .andWhere(`job.id NOT IN (${appliedJobIdsSubQuery})`)
+        // 3. Scoring Logic
+        .addSelect(
+          `(
+      (SELECT COUNT(*) FROM jsonb_array_elements_text(job.required_skills) AS s 
+       WHERE s = ANY(:userSkills)) * 10 +
+      (CASE WHEN company.address->>'city' ILIKE :userCity THEN 15 ELSE 0 END) +
+      (CASE WHEN job.job_description ILIKE :userBioPart THEN 5 ELSE 0 END)
+    )`,
+          'match_score',
+        )
+        .setParameters({
+          userId: user.id,
+          status: JobStatus.OPEN,
+          userSkills: user.skills || [],
+          userCity: user.location?.city || '',
+          userBioPart: `%${user.bio?.substring(0, 100)}%`,
+        })
+        .orderBy('match_score', 'DESC')
+        .addOrderBy('job.posted_on', 'DESC')
+        .getMany()
+    );
+  }
   // --- BOOKMARK LOGIC ---
   // (Assuming User entity has a ManyToMany relation 'bookmarked_jobs')
 
@@ -271,6 +322,44 @@ export class JobService {
     });
   }
 
+  async rejectJob(user: User, jobId: string) {
+    const job = await this.jobRepository.findOne({ where: { id: jobId } });
+
+    if (!job) throw new NotFoundException('Job not found');
+
+    const existingRejection = await this.rejectionRepository.findOne({
+      where: {
+        job: { id: jobId },
+        user: { id: user.id },
+      },
+    });
+
+    if (existingRejection) {
+      throw new BadRequestException('You have already rejected this job.');
+    }
+    const rejection = this.rejectionRepository.create({
+      job: { id: job.id },
+      user: { id: user.id },
+    });
+    return this.rejectionRepository.save(rejection);
+  }
+
+  async getrejectedJobs(user: User) {
+    return this.rejectionRepository.find({
+      where: { userId: user.id },
+    });
+  }
+
+  async getSingleAppliedJob(user: User, jobId: string) {
+    return this.applicationRepository.findOne({
+      where: {
+        userId: user.id,
+        jobId: jobId,
+      },
+      relations: ['job', 'job.company'],
+    });
+  }
+
   async getJobApplicants(userId: string, jobId: string) {
     return this.applicationRepository.find({
       where: { job: { id: jobId, creator: { id: userId } } },
@@ -278,6 +367,7 @@ export class JobService {
       order: { date_applied: 'DESC' },
     });
   }
+
   async getASingleJobApplicant(
     userId: string,
     jobId: string,

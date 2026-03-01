@@ -10,6 +10,7 @@ import { BcryptConfig } from '../../../common/utils/bcrypt.utils';
 import { UserRoles } from '../dto/create-user.dto';
 import { Exclude } from 'class-transformer';
 import { Bookmark } from '../../jobs/entities/job-bookmark.entity';
+import { JobRejection } from 'src/modules/jobs/entities/job-rejected.entity';
 
 export interface Location {
   country: string;
@@ -102,6 +103,9 @@ export class User {
 
   @OneToMany(() => Bookmark, (bookmark) => bookmark.user)
   bookmarks: Bookmark[];
+
+  @OneToMany(() => JobRejection, (rejection) => rejection.user)
+  rejected_jobs: JobRejection[];
 
   @BeforeInsert()
   @BeforeUpdate()

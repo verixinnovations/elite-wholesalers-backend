@@ -135,6 +135,11 @@ export class CreateUserDto {
   @IsString()
   bio?: string;
 
+  @ApiProperty({ example: 'Full detailed biography...', required: false })
+  @IsOptional()
+  @IsString()
+  rejectedJobs?: string;
+
   @ApiProperty({ example: 'Software Engineer based in Lagos', required: false })
   @IsOptional()
   @IsString()

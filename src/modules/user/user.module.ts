@@ -9,11 +9,19 @@ import { Company } from '../company/entities/company.entity';
 import { Job } from '../jobs/entities/job.entity';
 import { JobApplication } from '../jobs/entities/job-applicants.entity';
 import { Bookmark } from '../jobs/entities/job-bookmark.entity';
+import { JobRejection } from '../jobs/entities/job-rejected.entity';
 
 @Module({
   imports: [
     FileManagerModule,
-    TypeOrmModule.forFeature([User, Company, Bookmark, JobApplication, Job]),
+    TypeOrmModule.forFeature([
+      User,
+      Company,
+      Bookmark,
+      Job,
+      JobApplication,
+      JobRejection,
+    ]),
   ],
   controllers: [UserController],
   providers: [UserService],

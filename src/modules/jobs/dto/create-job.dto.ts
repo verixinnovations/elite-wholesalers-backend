@@ -162,6 +162,10 @@ export class JobSearchDto {
   query?: string;
 
   @IsOptional()
+  @IsEnum(JobType)
+  jobType?: JobType;
+
+  @IsOptional()
   @IsEnum(JobLocationType)
   locationType?: JobLocationType;
 
