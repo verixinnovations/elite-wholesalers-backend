@@ -25,24 +25,26 @@ export class FileManagerService {
     } else throw new BadGatewayException('Image upload failed');
   }
   async uploadResume(file: Express.Multer.File) {
-    if (file.mimetype.startsWith('image/')) {
+    // 1. Strict PDF-only validation
+    if (file.mimetype !== 'application/pdf') {
       throw new BadRequestException(
-        'Images are not allowed as resumes. Please upload a PDF or Word document.',
+        'Invalid file format. Only PDF documents are accepted as resumes.',
       );
     }
-
     const result = await this.cloudinaryService.uploadFile(file, {
-      resource_type: 'raw',
+      resource_type: 'auto',
       folder: 'resumes',
     });
+
     if (result.secure_url) {
-      console.log({ file, result });
       return {
         url: result.secure_url,
         publicId: result.public_id,
-        format: result.format || file.originalname.split('.').pop(),
+        format: 'pdf',
         name: file.originalname,
       };
-    } else throw new BadGatewayException('Resume upload failed');
+    } else {
+      throw new BadGatewayException('Resume upload failed');
+    }
   }
 }

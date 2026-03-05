@@ -8,6 +8,9 @@ import {
   UseInterceptors,
   UploadedFile,
   Put,
+  ParseFilePipe,
+  FileTypeValidator,
+  MaxFileSizeValidator,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -61,7 +64,15 @@ export class UserController {
   @UseInterceptors(FileInterceptor('resume'))
   uploadResume(
     @Req() req: IRequest,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new FileTypeValidator({ fileType: 'application/pdf' }),
+          new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }),
+        ],
+      }),
+    )
+    file: Express.Multer.File,
   ) {
     return this.userService.uploadResume(req.user.id, file);
   }
