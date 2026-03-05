@@ -108,7 +108,7 @@ export class CompanyController {
   }
 
   // POST /companies/upload-logo
-  @Put(':companyId/upload-logo')
+  @Put('upload/logo')
   @Roles(UserRoles.RECRUITER)
   @UseInterceptors(FileInterceptor('logo'))
   @ApiOperation({ summary: 'Upload company logo' })
@@ -120,11 +120,11 @@ export class CompanyController {
     @Param('companyId') companyId: string,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    return this.companyService.uploadLogo(companyId, file);
+    return this.companyService.uploadLogo(req.user, file);
   }
 
   // POST /companies/upload-cover
-  @Put(':companyId/upload-cover')
+  @Put('/upload/cover-image')
   @Roles(UserRoles.RECRUITER)
   @UseInterceptors(FileInterceptor('cover_image'))
   @ApiOperation({ summary: 'Upload cover image' })
@@ -140,6 +140,6 @@ export class CompanyController {
     @Param('companyId') companyId: string,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    return this.companyService.uploadCoverImage(companyId, file);
+    return this.companyService.uploadCoverImage(req.user, file);
   }
 }

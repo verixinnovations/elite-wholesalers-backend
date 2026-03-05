@@ -125,20 +125,20 @@ export class UserService {
     return this.userRepository.save(user);
   }
 
-  async updateUserProfilePicture(
-    id: string,
-    file: Express.Multer.File,
-  ): Promise<User> {
-    const profilePicture = await this.fileManagerService.uploadImage(file);
-    const user = await this.userRepository.preload({
-      id,
-      picture: profilePicture.url,
-    });
-
-    if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
-    }
-
+  async uploadPicture(userId: string, file: Express.Multer.File) {
+    const user = await this.viewUser(userId);
+    const picture = await this.fileManagerService.uploadImage(file);
+    user.picture = picture.url;
+    return this.userRepository.save(user);
+  }
+  async uploadResume(userId: string, file: Express.Multer.File) {
+    const user = await this.viewUser(userId);
+    const resume = await this.fileManagerService.uploadResume(file);
+    user.resume = {
+      name: resume.name,
+      url: resume.url,
+      format: resume.format,
+    };
     return this.userRepository.save(user);
   }
 

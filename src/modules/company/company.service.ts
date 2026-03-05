@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { Company } from './entities/company.entity';
 import { User } from '../user/entities/user.entity';
@@ -69,7 +69,7 @@ export class CompanyService {
 
   async findOne(companyId: string): Promise<Company> {
     const company = await this.companyRepository.findOne({
-      where: { companyId },
+      where: { companyId: ILike(companyId) },
     });
 
     if (!company) {
@@ -98,35 +98,27 @@ export class CompanyService {
   }
 
   // 5. Upload Logo
-  async uploadLogo(id: string, file: Express.Multer.File): Promise<Company> {
-    const logo = await this.fileManagerService.uploadImage(file);
-    const company = await this.companyRepository.preload({
-      id,
-      logo: logo.url,
+  async uploadLogo(user: User, file: Express.Multer.File): Promise<Company> {
+    const company = await this.companyRepository.findOne({
+      where: { ownerId: user.id },
     });
-
-    if (!company) {
-      throw new NotFoundException(`Company with ID ${id} not found`);
-    }
-
+    if (!company) throw new NotFoundException('Company not found');
+    const logo = await this.fileManagerService.uploadImage(file);
+    company.logo = logo.url;
     return this.companyRepository.save(company);
   }
 
   // 6. Upload Cover Image
   async uploadCoverImage(
-    id: string,
+    user: User,
     file: Express.Multer.File,
   ): Promise<Company> {
-    const coverImage = await this.fileManagerService.uploadImage(file);
-    const company = await this.companyRepository.preload({
-      id,
-      logo: coverImage.url,
+    const company = await this.companyRepository.findOne({
+      where: { ownerId: user.id },
     });
-
-    if (!company) {
-      throw new NotFoundException(`Company with ID ${id} not found`);
-    }
-
+    if (!company) throw new NotFoundException('Company not found');
+    const coverImage = await this.fileManagerService.uploadImage(file);
+    company.cover_image = coverImage.url;
     return this.companyRepository.save(company);
   }
 }

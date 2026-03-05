@@ -94,17 +94,13 @@ export class JobService {
     return this.jobRepository.remove(job);
   }
 
-  // --- JOB APPLICATION MANAGEMENT (By Recruiter) ---
   async updateJobStatus(user: User, jobId: string, status: JobStatus) {
     const job = await this.findMySingleJob(user, jobId);
 
     job.job_status = status;
 
-    // Logic: If Closed, auto-reject pending applicants
     if (status === JobStatus.CLOSED) {
       job.application_ends = new Date();
-
-      // Update all pending applications to REJECTED
       await this.applicationRepository
         .createQueryBuilder()
         .update(JobApplication)

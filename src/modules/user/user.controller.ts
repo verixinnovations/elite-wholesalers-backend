@@ -2,7 +2,6 @@ import {
   Controller,
   Get,
   Body,
-  Patch,
   Param,
   Delete,
   Req,
@@ -18,7 +17,11 @@ import {
   ApiConsumes,
   ApiOperation,
 } from '@nestjs/swagger';
-import { UpdateRoleDto, UserProfilePhotoDto } from './dto/create-user.dto';
+import {
+  UpdateRoleDto,
+  UserProfilePhotoDto,
+  UserResumeDto,
+} from './dto/create-user.dto';
 import type { IRequest } from '../../common/interface';
 import { FileInterceptor } from '@nestjs/platform-express';
 
@@ -39,7 +42,7 @@ export class UserController {
     return this.userService.getUserProfileSummary(req.user.id);
   }
 
-  @Patch('picture')
+  @Put('picture')
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Upload profile picture' })
   @ApiBody({ description: 'Upload profile photo', type: UserProfilePhotoDto })
@@ -48,10 +51,22 @@ export class UserController {
     @Req() req: IRequest,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    return this.userService.updateUserProfilePicture(req.user.id, file);
+    return this.userService.uploadPicture(req.user.id, file);
   }
 
-  @Patch()
+  @Put('resume')
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Upload resume' })
+  @ApiBody({ description: 'Upload resume', type: UserResumeDto })
+  @UseInterceptors(FileInterceptor('resume'))
+  uploadResume(
+    @Req() req: IRequest,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.userService.uploadResume(req.user.id, file);
+  }
+
+  @Put()
   @ApiOperation({ summary: 'Update user by ID' })
   update(@Req() req: IRequest, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.updateUser(req.user.id, updateUserDto);

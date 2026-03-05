@@ -103,7 +103,7 @@ export class CreateUserDto {
   @ApiProperty({ example: '', required: false })
   @IsString()
   @IsOptional()
-  picture: string;
+  picture?: string;
 
   @ApiProperty({ example: 'male' })
   @IsString()
@@ -162,6 +162,10 @@ export class CreateUserDto {
 export class UserProfilePhotoDto {
   @ApiProperty({ type: 'string', format: 'binary' })
   picture: Express.Multer.File;
+}
+export class UserResumeDto {
+  @ApiProperty({ type: 'string', format: 'binary' })
+  resume: Express.Multer.File;
 }
 
 export class UpdateRoleDto {

@@ -24,6 +24,12 @@ export interface Location {
   longitude: number;
 }
 
+export interface Resume {
+  name: string;
+  format: string;
+  url: string;
+}
+
 @Entity()
 export class User {
   @PrimaryGeneratedColumn('uuid')
@@ -84,6 +90,9 @@ export class User {
 
   @Column({ type: 'date', nullable: true })
   date_of_birth: Date;
+
+  @Column({ type: 'jsonb', nullable: true })
+  resume: Resume;
 
   // Storing Location as a JSON object (e.g. { city: "Lagos", country: "Nigeria", address: "..." })
   @Column({ type: 'jsonb', nullable: true })

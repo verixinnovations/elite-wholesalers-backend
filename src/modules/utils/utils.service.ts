@@ -4,10 +4,10 @@ import { Injectable } from '@nestjs/common';
 export class UtilsService {
   getInsights() {
     return {
-      active_jobs: 210,
+      active_jobs: 4000,
       users: 1500,
-      companies_count: 230,
-      daily_posts: 1200,
+      companies_count: 250,
+      daily_posts: 120,
     };
   }
 }
