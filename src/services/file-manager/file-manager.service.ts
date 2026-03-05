@@ -1,7 +1,7 @@
 import {
+  BadGatewayException,
   BadRequestException,
   Injectable,
-  InternalServerErrorException,
 } from '@nestjs/common';
 import { CloudinaryService } from 'nestjs-cloudinary';
 import { Express } from 'express';
@@ -12,7 +12,7 @@ export class FileManagerService {
   async uploadImage(file: Express.Multer.File) {
     const result = await this.cloudinaryService.uploadFile(file, {
       resource_type: 'auto',
-      folder: 'badge_images',
+      folder: 'images',
     });
     if (result.secure_url) {
       console.log({ file, result });
@@ -22,7 +22,7 @@ export class FileManagerService {
         format: result.format,
         name: file.originalname,
       };
-    } else throw new InternalServerErrorException('Image upload failed');
+    } else throw new BadGatewayException('Image upload failed');
   }
   async uploadResume(file: Express.Multer.File) {
     if (file.mimetype.startsWith('image/')) {
@@ -33,7 +33,7 @@ export class FileManagerService {
 
     const result = await this.cloudinaryService.uploadFile(file, {
       resource_type: 'raw',
-      folder: 'badge_resumes',
+      folder: 'resumes',
     });
     if (result.secure_url) {
       console.log({ file, result });
@@ -43,6 +43,6 @@ export class FileManagerService {
         format: result.format || file.originalname.split('.').pop(),
         name: file.originalname,
       };
-    } else throw new InternalServerErrorException('Image upload failed');
+    } else throw new BadGatewayException('Resume upload failed');
   }
 }

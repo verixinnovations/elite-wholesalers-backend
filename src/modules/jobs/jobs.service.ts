@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -244,7 +243,7 @@ export class JobService {
 
     // 1. Validations
     if (job.job_status !== JobStatus.OPEN) {
-      throw new ForbiddenException('Job is not open for applications');
+      throw new BadRequestException('Job is not open for applications');
     }
 
     // 2. Check if already applied

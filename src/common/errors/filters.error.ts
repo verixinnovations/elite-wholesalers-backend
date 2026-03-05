@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Logger,
 } from '@nestjs/common';
+import { STATUS_CODES } from 'http';
 
 interface FieldError {
   field: string;
@@ -105,10 +106,6 @@ export class GlobalExceptionFilter implements ExceptionFilter {
   }
 }
 
-// Helper to get standard HTTP status names (e.g., 404 -> 'Not Found')
 function httpStatusMessage(status: number): string {
-  // You can use the 'http' module or a simple map.
-  // NestJS doesn't export the text map by default, so we default to 'Error'
-  // or rely on the exception's internal error name.
-  return 'Error';
+  return STATUS_CODES[status] || 'Unknown Error';
 }

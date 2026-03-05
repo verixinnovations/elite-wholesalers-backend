@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -42,6 +41,10 @@ export class AuthService {
       user.email,
       `${user.lastname} ${user.firstname}`,
     );
+    const hashedPassword = await BcryptConfig.hashPassword(
+      createUserDto.password,
+    );
+    user.password = hashedPassword;
     return this.userRepository.save(user);
   }
 
@@ -103,7 +106,7 @@ export class AuthService {
         }
       } else throw new NotFoundException('No user with the email found');
     } catch (e: unknown) {
-      throw new InternalServerErrorException(e);
+      throw new BadRequestException(e);
     }
   }
 

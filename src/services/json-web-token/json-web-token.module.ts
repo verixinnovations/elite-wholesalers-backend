@@ -10,7 +10,7 @@ import { EnvConfig } from '../../common/config/env.config';
       global: true,
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>(EnvConfig.JWT_ACCESS_SECRET),
-        // signOptions: { expiresIn: '7d' },
+        signOptions: { expiresIn: '7d' },
       }),
       inject: [ConfigService],
     }),
