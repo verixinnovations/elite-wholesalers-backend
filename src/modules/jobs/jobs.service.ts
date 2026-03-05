@@ -105,7 +105,7 @@ export class JobService {
         .createQueryBuilder()
         .update(JobApplication)
         .set({ status: ApplicationStatus.REJECTED })
-        .where('job_id = :jobId', { jobId })
+        .where('jobId = :jobId', { jobId })
         .andWhere('status IN (:...statuses)', {
           statuses: [ApplicationStatus.SUBMITTED, ApplicationStatus.RECEIVED],
         })
