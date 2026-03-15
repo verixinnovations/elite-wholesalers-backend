@@ -37,7 +37,3 @@ export class EncryptionService {
     return JSON.parse(decrypted) as string;
   }
 }
-
-const encryptedText = EncryptionService.encrypt(499);
-console.log(encryptedText);
-console.log(EncryptionService.decrypt(encryptedText));

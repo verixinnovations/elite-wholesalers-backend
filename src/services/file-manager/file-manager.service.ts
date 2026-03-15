@@ -15,7 +15,6 @@ export class FileManagerService {
       folder: 'images',
     });
     if (result.secure_url) {
-      console.log({ file, result });
       return {
         url: result.secure_url,
         publicId: result.public_id,
