@@ -83,6 +83,7 @@ export class JobService {
       where: { creator: { id: user.id } },
       relations: ['applications', 'company'],
       order: { posted_on: 'DESC' },
+      withDeleted: true,
     });
     return jobs.map((job) =>
       Object.assign(job, { applicants_count: job.applications.length }),
@@ -93,6 +94,7 @@ export class JobService {
     const job = await this.jobRepository.findOne({
       where: { id: jobId, creator: { id: user.id } },
       relations: ['applications', 'applications.user', 'company', 'creator'],
+      withDeleted: true,
     });
 
     if (!job) throw new NotFoundException('Job not found or access denied');
@@ -138,7 +140,9 @@ export class JobService {
           job: { id: jobId },
           status: In([ApplicationStatus.SUBMITTED, ApplicationStatus.RECEIVED]),
         },
-        relations: ['user'], // Ensure you load the user to get their email/name
+        relations: ['user'],
+        withDeleted: true,
+        // Ensure you load the user to get their email/name
       });
 
       // 2. Perform the bulk update in the DB
@@ -380,6 +384,7 @@ export class JobService {
       where: { user: { id: user.id } },
       relations: ['job', 'job.company'],
       order: { date_applied: 'DESC' },
+      withDeleted: true,
     });
   }
 
@@ -418,6 +423,7 @@ export class JobService {
         jobId: jobId,
       },
       relations: ['job', 'job.company'],
+      withDeleted: true,
     });
   }
 
@@ -426,6 +432,7 @@ export class JobService {
       where: { job: { id: jobId, creator: { id: userId } } },
       relations: ['job', 'user'],
       order: { date_applied: 'DESC' },
+      withDeleted: true,
     });
   }
 
@@ -441,6 +448,7 @@ export class JobService {
       },
       relations: ['job', 'user'],
       order: { date_applied: 'DESC' },
+      withDeleted: true,
     });
   }
 
@@ -459,6 +467,7 @@ export class JobService {
         },
       },
       relations: ['user', 'job', 'job.creator', 'job.company'],
+      withDeleted: true,
     });
     if (!application) {
       throw new NotFoundException(
@@ -539,6 +548,7 @@ export class JobService {
     const bookmarks = await this.bookmarkRepository.find({
       where: { userId },
       relations: ['job', 'job.company'],
+      withDeleted: true,
       order: { createdAt: 'DESC' },
     });
 
