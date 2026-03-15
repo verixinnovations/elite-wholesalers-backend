@@ -111,6 +111,7 @@ export class JobService {
     const job = await this.findMySingleJob(user, jobId);
     if (job) {
       const recruiter = await this.userService.findOne({ id: user.id });
+      const deletedJob = this.jobRepository.softDelete(jobId);
       await this.emailService.sendJobDeletedEmail(recruiter.email, {
         employerName: recruiter.fullname,
         jobTitle: job.job_title,
@@ -120,14 +121,14 @@ export class JobService {
         closeDate: DateFunctions.formatNorminalDate(new Date()),
         postNewJobLink: `${this.configService.get(EnvConfig.FRONTEND_URL)}/dashboard/create-job`,
       });
-      return this.jobRepository.softDelete(jobId);
+      return deletedJob;
     }
   }
 
   async updateJobStatus(user: User, jobId: string, status: JobStatus) {
     const job = await this.findMySingleJob(user, jobId);
     job.job_status = status;
-
+    const updatedJob = this.jobRepository.save(job);
     if (status === JobStatus.CLOSED) {
       job.application_ends = new Date();
 
@@ -165,7 +166,7 @@ export class JobService {
           ),
       );
     }
-    return this.jobRepository.save(job);
+    return updatedJob;
   }
 
   async findAllOpenJobs(searchDto: JobSearchDto) {
@@ -323,6 +324,7 @@ export class JobService {
       status: ApplicationStatus.SUBMITTED,
     });
     const applicant = await this.userService.findOne({ id: user.id });
+    const appliedJob = this.applicationRepository.save(application);
     await this.emailService.sendApplicationSubmittedEmail(applicant.email, {
       candidateName: applicant.fullname,
       jobTitle: job.job_title,
@@ -330,7 +332,7 @@ export class JobService {
       submissionDate: new Date().toDateString(),
       applicationStatusLink: `${this.configService.get(EnvConfig.FRONTEND_URL)}/dashboard`,
     });
-    return this.applicationRepository.save(application);
+    return appliedJob;
   }
   async getSwippableJobs(user: User) {
     const queryBuilder = this.jobRepository.createQueryBuilder('job');
@@ -463,6 +465,10 @@ export class JobService {
         'Application not found or unauthorized access',
       );
     }
+    Object.assign(application, data);
+    const updatedApplicantStatus =
+      await this.applicationRepository.save(application);
+
     if (data.status === ApplicationStatus.RECEIVED) {
       await this.emailService.sendApplicationReceivedEmail(
         application.user.email,
@@ -511,8 +517,7 @@ export class JobService {
         offerLetterLink: `${this.configService.get<string>(EnvConfig.FRONTEND_URL)}/dashboard`,
       });
     }
-    Object.assign(application, data);
-    return await this.applicationRepository.save(application);
+    return updatedApplicantStatus;
   }
 
   async toggleBookmark(userId: string, jobId: string) {

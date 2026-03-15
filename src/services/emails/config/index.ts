@@ -1,14 +1,18 @@
 import fs from 'fs';
 import path from 'path';
 import handlebars from 'handlebars';
-import { Resend } from 'resend';
-import { BadGatewayException } from '@nestjs/common';
+import { CreateEmailOptions, Resend } from 'resend';
 
-export const emailSenderConfig = async (options: any) => {
+export const emailSenderConfig = async (
+  options: CreateEmailOptions,
+): Promise<boolean> => {
   const resend = new Resend(process.env.RESEND_API_KEY);
-  const { data, error } = await resend.emails.send(options);
-  if (data) return true;
-  throw new BadGatewayException(error);
+
+  const { error } = await resend.emails.send(options);
+  if (error) {
+    return false;
+  }
+  return true;
 };
 
 export const emailTemplateBuilder = (
