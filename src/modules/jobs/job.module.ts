@@ -10,11 +10,13 @@ import { UserModule } from '../user/user.module';
 import { CompanyModule } from '../company/company.module';
 import { Bookmark } from './entities/job-bookmark.entity';
 import { JobRejection } from './entities/job-rejected.entity';
+import { EmailModule } from 'src/services/emails/email.module';
 
 @Module({
   imports: [
     CompanyModule,
     UserModule,
+    EmailModule,
     TypeOrmModule.forFeature([
       User,
       Job,

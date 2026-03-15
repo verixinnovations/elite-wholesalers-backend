@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Brackets, Repository } from 'typeorm';
+import { Brackets, In, Repository } from 'typeorm';
 import { Job, JobStatus } from './entities/job.entity';
 
 import { CreateJobDto, JobSearchDto } from './dto/create-job.dto';
@@ -21,6 +21,12 @@ import {
   RecruiterUpdateApplicationDto,
 } from './dto/applicants.dto';
 import { JobRejection } from './entities/job-rejected.entity';
+import { EmailService } from '../../services/emails/email.service';
+import { EnvConfig } from '../../common/config/env.config';
+import { ConfigService } from '@nestjs/config';
+import { DateFunctions } from '../../common/utils/date.utils';
+import { NumberFunctions } from '../../common/utils/numbers.utils';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class JobService {
@@ -41,6 +47,9 @@ export class JobService {
     private readonly bookmarkRepository: Repository<Bookmark>,
 
     private readonly companyService: CompanyService,
+    private readonly userService: UserService,
+    private readonly emailService: EmailService,
+    private readonly configService: ConfigService,
   ) {}
 
   // --- COMPANY/RECRUITER ACTIONS ---
@@ -48,15 +57,25 @@ export class JobService {
   async create(user: User, createJobDto: CreateJobDto) {
     // 1. Find the company associated with this user
     const company = await this.companyService.findMyCompany(user);
-
+    const recruiter = await this.userService.findOne({ id: user.id });
     // 2. Create Job Linked to Company and User
-    const newJob = this.jobRepository.create({
+    const job = this.jobRepository.create({
       ...createJobDto,
       company: company,
       creator: user,
     });
 
-    return this.jobRepository.save(newJob);
+    const savedJob = await this.jobRepository.save(job);
+    await this.emailService.sendJobPostedEmail(recruiter.email, {
+      employerName: recruiter.fullname,
+      jobTitle: job.job_title,
+      jobId: savedJob.id,
+      jobLink: `${this.configService.get(EnvConfig.FRONTEND_URL)}/jobs/${job.id}`,
+      postDate: DateFunctions.formatNorminalDate(savedJob.posted_on),
+      jobLocation: job.job_location_type,
+    });
+
+    return savedJob;
   }
 
   async findMyJobs(user: User) {
@@ -73,7 +92,7 @@ export class JobService {
   async findMySingleJob(user: User, jobId: string) {
     const job = await this.jobRepository.findOne({
       where: { id: jobId, creator: { id: user.id } },
-      relations: ['applications', 'applications.user', 'company'],
+      relations: ['applications', 'applications.user', 'company', 'creator'],
     });
 
     if (!job) throw new NotFoundException('Job not found or access denied');
@@ -90,16 +109,38 @@ export class JobService {
 
   async delete(user: User, jobId: string) {
     const job = await this.findMySingleJob(user, jobId);
-    return this.jobRepository.remove(job);
+    if (job) {
+      const recruiter = await this.userService.findOne({ id: user.id });
+      await this.emailService.sendJobDeletedEmail(recruiter.email, {
+        employerName: recruiter.fullname,
+        jobTitle: job.job_title,
+        jobId,
+        postDate: DateFunctions.formatDate(new Date(job.posted_on)),
+        totalApplications: job.applicants_count,
+        closeDate: DateFunctions.formatNorminalDate(new Date()),
+        postNewJobLink: `${this.configService.get(EnvConfig.FRONTEND_URL)}/dashboard/create-job`,
+      });
+      return this.jobRepository.softDelete(jobId);
+    }
   }
 
   async updateJobStatus(user: User, jobId: string, status: JobStatus) {
     const job = await this.findMySingleJob(user, jobId);
-
     job.job_status = status;
 
     if (status === JobStatus.CLOSED) {
       job.application_ends = new Date();
+
+      // 1. Identify who is being rejected right now so we can mail them
+      const applicationsToNotify = await this.applicationRepository.find({
+        where: {
+          job: { id: jobId },
+          status: In([ApplicationStatus.SUBMITTED, ApplicationStatus.RECEIVED]),
+        },
+        relations: ['user'], // Ensure you load the user to get their email/name
+      });
+
+      // 2. Perform the bulk update in the DB
       await this.applicationRepository
         .createQueryBuilder()
         .update(JobApplication)
@@ -109,8 +150,21 @@ export class JobService {
           statuses: [ApplicationStatus.SUBMITTED, ApplicationStatus.RECEIVED],
         })
         .execute();
-    }
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const emailPromises = applicationsToNotify.map((app) =>
+        this.emailService
+          .sendApplicationRejectedEmail(app.user.email, {
+            candidateName: app.user.fullname,
+            jobTitle: app.job.job_title,
+            companyName: app.job.company.company_name,
+            jobBoardLink: `${this.configService.get(EnvConfig.FRONTEND_URL)}/jobs`,
+          })
+          .catch((err) =>
+            console.error(`Failed to send email to ${app.user.email}:`, err),
+          ),
+      );
+    }
     return this.jobRepository.save(job);
   }
 
@@ -237,7 +291,10 @@ export class JobService {
   // --- THE CORE APPLY LOGIC ---
 
   async applyForJob(user: User, jobId: string, dto: CreateApplicationDto) {
-    const job = await this.jobRepository.findOne({ where: { id: jobId } });
+    const job = await this.jobRepository.findOne({
+      where: { id: jobId },
+      relations: ['company', 'creator'],
+    });
 
     if (!job) throw new NotFoundException('Job not found');
 
@@ -265,7 +322,14 @@ export class JobService {
       cover_letter: dto.cover_letter,
       status: ApplicationStatus.SUBMITTED,
     });
-
+    const applicant = await this.userService.findOne({ id: user.id });
+    await this.emailService.sendApplicationSubmittedEmail(applicant.email, {
+      candidateName: applicant.fullname,
+      jobTitle: job.job_title,
+      companyName: job.company.company_name,
+      submissionDate: new Date().toDateString(),
+      applicationStatusLink: `${this.configService.get(EnvConfig.FRONTEND_URL)}/dashboard`,
+    });
     return this.applicationRepository.save(application);
   }
   async getSwippableJobs(user: User) {
@@ -317,7 +381,7 @@ export class JobService {
     });
   }
 
-  async rejectJob(user: User, jobId: string) {
+  async rejectJobFromSwipe(user: User, jobId: string) {
     const job = await this.jobRepository.findOne({ where: { id: jobId } });
 
     if (!job) throw new NotFoundException('Job not found');
@@ -392,11 +456,60 @@ export class JobService {
           creator: { id: recruiterId },
         },
       },
+      relations: ['user', 'job', 'job.creator', 'job.company'],
     });
     if (!application) {
       throw new NotFoundException(
         'Application not found or unauthorized access',
       );
+    }
+    if (data.status === ApplicationStatus.RECEIVED) {
+      await this.emailService.sendApplicationReceivedEmail(
+        application.user.email,
+        {
+          candidateName: application.user.fullname,
+          jobTitle: application.job.job_title,
+          companyName: application.job.company.company_name,
+          dashboardLink: `${this.configService.get<string>(EnvConfig.FRONTEND_URL)}/dashboard`,
+        },
+      );
+    } else if (data.status === ApplicationStatus.PROCESSING) {
+      await this.emailService.sendInterviewInvitationEmail(
+        application.user.email,
+        {
+          candidateName: application.user.fullname,
+          jobTitle: application.job.job_title,
+          companyName: application.job.company.company_name,
+          interviewDateTime: `${DateFunctions.formatDate(new Date(data.interview_details?.date ?? ''))} - ${DateFunctions.getTime(data.interview_details?.date ?? '')}`,
+          interviewType: 'Virtual',
+          meetingLink: data.interview_details?.meeting_link ?? '',
+          notes: data.interview_details?.note,
+        },
+      );
+    } else if (data.status === ApplicationStatus.REJECTED) {
+      await this.emailService.sendApplicationRejectedEmail(
+        application.user.email,
+        {
+          candidateName: application.user.fullname,
+          jobTitle: application.job.job_title,
+          companyName: application.job.company.company_name,
+          jobBoardLink: `${this.configService.get(EnvConfig.FRONTEND_URL)}/jobs`,
+          notes: data.notes,
+        },
+      );
+    } else if (data.status === ApplicationStatus.ACCEPTED) {
+      await this.emailService.sendOfferExtendedEmail(application.user.email, {
+        candidateName: application.user.fullname,
+        jobTitle: application.job.job_title,
+        companyName: application.job.company.company_name,
+        salaryRange: NumberFunctions.formatCurrency(
+          application.job.salary.value,
+          application.job.salary.currency,
+        ),
+        employmentType: application.job.job_type,
+        locationType: application.job.job_location_type,
+        offerLetterLink: `${this.configService.get<string>(EnvConfig.FRONTEND_URL)}/dashboard`,
+      });
     }
     Object.assign(application, data);
     return await this.applicationRepository.save(application);

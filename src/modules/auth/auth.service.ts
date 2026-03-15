@@ -40,6 +40,7 @@ export class AuthService {
     await this.emailService.sendWelcomeEmail(
       user.email,
       `${user.lastname} ${user.firstname}`,
+      user.role,
     );
     const hashedPassword = await BcryptConfig.hashPassword(
       createUserDto.password,
@@ -138,6 +139,7 @@ export class AuthService {
         await this.emailService.sendWelcomeEmail(
           email!,
           `${family_name ?? ''} ${given_name ?? ''}`.trim(),
+          user.role,
         );
       }
 

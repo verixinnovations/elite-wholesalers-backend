@@ -148,7 +148,7 @@ export class UserService {
    * @returns nuber of rows deleted or affected
    */
   async removeUser(id: string): Promise<DeleteResult> {
-    const result: DeleteResult = await this.userRepository.delete(id);
+    const result: DeleteResult = await this.userRepository.softDelete(id);
 
     // In practice, affected is 0 when no rows are deleted; it is almost never null
     // However, the type allows null, so we handle affected === 0 || affected === null

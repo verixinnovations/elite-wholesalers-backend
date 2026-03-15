@@ -76,7 +76,7 @@ export class JobController {
     type: CreateJobDto,
   })
   rejectJob(@Req() req: IRequest, @Param('id') jobId: string) {
-    return this.jobService.rejectJob(req.user, jobId);
+    return this.jobService.rejectJobFromSwipe(req.user, jobId);
   }
 
   @Get('swippable')

@@ -92,6 +92,7 @@ export class CreateJobDto {
   @ValidateNested()
   @Type(() => JobDurationDto)
   @IsNotEmpty()
+  @IsOptional()
   job_duration: JobDurationDto;
 
   @ApiProperty({ type: JobSalaryDto, description: 'Salary details' })

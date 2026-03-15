@@ -2,6 +2,7 @@ import {
   BeforeInsert,
   BeforeUpdate,
   Column,
+  DeleteDateColumn,
   Entity,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -110,11 +111,17 @@ export class User {
   @Column({ type: 'simple-array', nullable: true })
   services: string[];
 
+  @Column({ type: 'boolean', default: false })
+  is_profile_completed: boolean;
+
   @OneToMany(() => Bookmark, (bookmark) => bookmark.user)
   bookmarks: Bookmark[];
 
   @OneToMany(() => JobRejection, (rejection) => rejection.user)
   rejected_jobs: JobRejection[];
+
+  @DeleteDateColumn({ nullable: true })
+  deleted_at: Date;
 
   @BeforeInsert()
   @BeforeUpdate()
@@ -122,6 +129,31 @@ export class User {
     if (this.firstname && this.lastname) {
       this.fullname = this.firstname + ' ' + this.lastname;
     }
+  }
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  checkProfileCompletion() {
+    const requiredFields = [
+      this.firstname,
+      this.lastname,
+      this.email,
+      this.date_of_birth,
+      this.short_bio,
+      this.picture,
+    ];
+
+    // Check if simple fields are filled
+    const hasBasicInfo = requiredFields.every(
+      (field) => field !== null && field !== undefined && field !== '',
+    );
+
+    // Check complex types (resume and skills)
+    const hasResume = !!(this.resume && this.resume.url);
+    const hasSkills = !!(this.skills && this.skills.length > 0);
+    const hasServices = !!(this.services && this.services.length > 0);
+    this.is_profile_completed =
+      hasBasicInfo && hasResume && hasSkills && hasServices;
   }
 
   @BeforeInsert()

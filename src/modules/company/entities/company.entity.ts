@@ -7,6 +7,7 @@ import {
   UpdateDateColumn,
   JoinColumn,
   OneToOne,
+  DeleteDateColumn,
 } from 'typeorm';
 
 // Interfaces to define the shape of the JSONB columns
@@ -110,4 +111,7 @@ export class Company {
 
   @UpdateDateColumn()
   updated_at: Date;
+
+  @DeleteDateColumn({ nullable: true })
+  deleted_at: Date;
 }

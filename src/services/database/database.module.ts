@@ -28,7 +28,7 @@ import { JobRejection } from 'src/modules/jobs/entities/job-rejected.entity';
           JobApplication,
           JobRejection,
         ],
-        synchronize: configService.get<boolean>('DB_SYNC', true),
+        synchronize: true,
         dropSchema: false,
         logging: false,
         ssl: {

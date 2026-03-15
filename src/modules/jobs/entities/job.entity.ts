@@ -8,6 +8,7 @@ import {
   UpdateDateColumn,
   JoinColumn,
   Index,
+  DeleteDateColumn,
 } from 'typeorm';
 import { JobApplication } from './job-applicants.entity';
 import { Company } from '../../company/entities/company.entity';
@@ -114,7 +115,7 @@ export class Job {
   @Column({ type: 'timestamp' })
   application_ends: Date;
 
-  @Column({ type: 'jsonb' })
+  @Column({ type: 'jsonb', nullable: true })
   job_duration: JobDuration;
 
   @Column({ type: 'jsonb' })
@@ -155,4 +156,7 @@ export class Job {
 
   @UpdateDateColumn()
   updated_at: Date;
+
+  @DeleteDateColumn({ nullable: true })
+  deleted_at: Date;
 }
