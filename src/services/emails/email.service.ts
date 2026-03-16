@@ -196,8 +196,8 @@ export class EmailService {
     const mailOptions = emailTemplateBuilder(
       'application-submitted.hbs',
       email,
-      'Application Submitted',
-      'Application Sent',
+      'Application Reviewed',
+      'Application Processing',
       data,
     );
     return emailSenderConfig(mailOptions);
@@ -263,8 +263,8 @@ export class EmailService {
     const mailOptions = emailTemplateBuilder(
       'job-deleted.hbs',
       email,
-      'Job Posting Closed',
-      'Posting Closed',
+      'Job Posting Deleted!',
+      'Deleted Job Listing',
       data,
     );
     return emailSenderConfig(mailOptions);

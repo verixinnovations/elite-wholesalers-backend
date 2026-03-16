@@ -32,6 +32,7 @@
       font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
       color: #2d3748;
       line-height: 1.6;
+      font-weight: 300 !important;
       -webkit-text-size-adjust: 100%;
       -ms-text-size-adjust: 100%;
     }
@@ -59,7 +60,6 @@
     }
 
     h1, h2, h3, h4, h5, h6 {
-      font-family: 'Audiowide', sans-serif !important;
       margin: 0;
       padding: 0;
       line-height: 1.2;
@@ -68,6 +68,7 @@
     p {
       margin: 0;
       padding: 0;
+      font-weight: 300 !important;
     }
 
     /* Header */
@@ -84,7 +85,7 @@
     }
 
     .header-title h1 {
-      font-size: 56px;
+      font-size: 40px;
       font-weight: 800;
       color: #ffffff;
       letter-spacing: -1px;
@@ -110,9 +111,9 @@
       margin-bottom: 0;
     }
 
-    .body-text strong {
+    strong {
       font-weight: 700 !important;
-      color: #3301fa;
+      color: #0150fa !important;
     }
 
     .body-text ul {
@@ -153,9 +154,8 @@
       border: 3px solid #0133fa !important;
       border-radius: 36px;
       color: #0133fa !important;
-      font-family: 'Outfit', sans-serif;
       font-size: 16px;
-      font-weight: 600;
+      font-weight: 600 !important;
       padding: 14px 48px;
       text-decoration: none !important;
       transition: all 0.3s ease;
@@ -173,7 +173,7 @@
     /* Cheers Section */
     .cheers-text {
       font-size: 24px;
-      font-weight: 800;
+      font-weight: 800 !important;
       font-family: 'Audiowide', sans-serif !important;
       background: linear-gradient(120deg, #667eea, #764ba2);
       -webkit-background-clip: text;
@@ -247,7 +247,7 @@
         max-width: 70px;
       }
       .header-title h1 {
-        font-size: 38px !important;
+        font-size: 24px !important;
         letter-spacing: -0.5px;
       }
       .content-padding {
@@ -304,7 +304,7 @@
           <table width="100%" border="0" cellpadding="0" cellspacing="0">
             <tr>
               <td align="center" class="header-title">
-                <h1>{{pageHeading}}</h1>
+                <h1 class="">{{pageHeading}}</h1>
               </td>
             </tr>
           </table>

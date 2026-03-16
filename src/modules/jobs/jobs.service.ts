@@ -83,7 +83,6 @@ export class JobService {
       where: { creator: { id: user.id } },
       relations: ['applications', 'company'],
       order: { posted_on: 'DESC' },
-      withDeleted: true,
     });
     return jobs.map((job) =>
       Object.assign(job, { applicants_count: job.applications.length }),
@@ -94,7 +93,6 @@ export class JobService {
     const job = await this.jobRepository.findOne({
       where: { id: jobId, creator: { id: user.id } },
       relations: ['applications', 'applications.user', 'company', 'creator'],
-      withDeleted: true,
     });
 
     if (!job) throw new NotFoundException('Job not found or access denied');
@@ -314,6 +312,7 @@ export class JobService {
         job: { id: jobId },
         user: { id: user.id },
       },
+      withDeleted: true,
     });
 
     if (existingApplication) {
