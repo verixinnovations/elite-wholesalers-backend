@@ -121,14 +121,14 @@ export class EmailService {
       employerName: string;
       jobTitle: string;
       candidateName: string;
-      yearsExperience: string;
+      shortBio: string;
       applicationDate: string;
-      candidateSummary: string;
+      coverLetter: string;
       applicationLink: string;
     },
   ) {
     const mailOptions = emailTemplateBuilder(
-      'job-accepted.hbs',
+      'new-candidate.hbs',
       email,
       'New Application Received',
       'New Application',
@@ -194,7 +194,7 @@ export class EmailService {
     },
   ) {
     const mailOptions = emailTemplateBuilder(
-      'application-submitted.hbs',
+      'application-viewed.hbs',
       email,
       'Application Reviewed',
       'Application Processing',

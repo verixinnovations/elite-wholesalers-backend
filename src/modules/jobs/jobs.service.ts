@@ -327,6 +327,7 @@ export class JobService {
       status: ApplicationStatus.SUBMITTED,
     });
     const applicant = await this.userService.findOne({ id: user.id });
+    const recruiter = await this.userService.findOne({ id: job.creatorId });
     const appliedJob = this.applicationRepository.save(application);
     await this.emailService.sendApplicationSubmittedEmail(applicant.email, {
       candidateName: applicant.fullname,
@@ -334,6 +335,18 @@ export class JobService {
       companyName: job.company.company_name,
       submissionDate: new Date().toDateString(),
       applicationStatusLink: `${this.configService.get(EnvConfig.FRONTEND_URL)}/dashboard`,
+    });
+
+    await this.emailService.sendNewApplicationEmail(recruiter.email, {
+      employerName: recruiter.fullname,
+      jobTitle: job.job_title,
+      candidateName: applicant.fullname,
+      applicationDate: DateFunctions.formatDate(
+        new Date((await appliedJob).date_applied),
+      ),
+      shortBio: applicant.short_bio ?? 'N/A',
+      coverLetter: dto.cover_letter ?? 'N/A',
+      applicationLink: `${this.configService.get(EnvConfig.FRONTEND_URL)}/dashboard/listings/${job.id}/applicants/${applicant.id}`,
     });
     return appliedJob;
   }
