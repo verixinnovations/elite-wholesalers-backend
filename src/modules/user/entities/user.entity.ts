@@ -4,15 +4,11 @@ import {
   Column,
   DeleteDateColumn,
   Entity,
-  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { BcryptConfig } from '../../../common/utils/bcrypt.utils';
-import { UserRoles } from '../dto/create-user.dto';
+import { AccountType } from '../dto/create-user.dto';
 import { Exclude } from 'class-transformer';
-import { Bookmark } from '../../jobs/entities/job-bookmark.entity';
-import { JobRejection } from 'src/modules/jobs/entities/job-rejected.entity';
-
 export interface Location {
   country: string;
   state: string;
@@ -25,10 +21,17 @@ export interface Location {
   longitude: number;
 }
 
-export interface Resume {
-  name: string;
-  format: string;
-  url: string;
+export interface BusinessDetails {
+  abn: string;
+  acn?: string;
+  abn_verfied?: boolean;
+  business_name: string;
+  business_type: string;
+  business_website?: string;
+  industry: string;
+  license_number: string;
+  license_verfied?: boolean;
+  stateIssued: string;
 }
 
 @Entity()
@@ -58,10 +61,10 @@ export class User {
 
   @Column({
     type: 'enum',
-    enum: UserRoles,
-    default: UserRoles.USER,
+    enum: AccountType,
+    default: AccountType.INDIVIDUAL,
   })
-  role: UserRoles;
+  accountType: AccountType;
 
   @Column({
     type: 'varchar',
@@ -90,35 +93,23 @@ export class User {
   gender: string;
 
   @Column({ type: 'date', nullable: true })
-  date_of_birth: Date;
+  date_of_birth: string;
 
-  @Column({ type: 'jsonb', nullable: true })
-  resume: Resume;
+  @Column({ type: 'varchar', length: 24, nullable: true })
+  phone_number: string;
 
   // Storing Location as a JSON object (e.g. { city: "Lagos", country: "Nigeria", address: "..." })
   @Column({ type: 'jsonb', nullable: true })
   location: Location;
 
+  @Column({ type: 'jsonb', nullable: true })
+  business_details: BusinessDetails;
+
   @Column({ type: 'text', nullable: true })
   bio: string;
 
-  @Column({ length: 150, nullable: true }) // Short bio usually has a limit
-  short_bio: string;
-
-  @Column({ type: 'simple-array', nullable: true })
-  skills: string[];
-
-  @Column({ type: 'simple-array', nullable: true })
-  services: string[];
-
   @Column({ type: 'boolean', default: false })
   is_profile_completed: boolean;
-
-  @OneToMany(() => Bookmark, (bookmark) => bookmark.user)
-  bookmarks: Bookmark[];
-
-  @OneToMany(() => JobRejection, (rejection) => rejection.user)
-  rejected_jobs: JobRejection[];
 
   @DeleteDateColumn({ nullable: true })
   deleted_at: Date;
@@ -139,7 +130,6 @@ export class User {
       this.lastname,
       this.email,
       this.date_of_birth,
-      this.short_bio,
       this.picture,
     ];
 
@@ -148,19 +138,14 @@ export class User {
       (field) => field !== null && field !== undefined && field !== '',
     );
 
-    // Check complex types (resume and skills)
-    const hasResume = !!(this.resume && this.resume.url);
-    const hasSkills = !!(this.skills && this.skills.length > 0);
-    const hasServices = !!(this.services && this.services.length > 0);
-    this.is_profile_completed =
-      hasBasicInfo && hasResume && hasSkills && hasServices;
+    this.is_profile_completed = hasBasicInfo;
   }
 
   @BeforeInsert()
   generateCustomUsername() {
     if (!this.username) {
       const randomChars = Math.random().toString(36).substring(2, 10);
-      this.username = `bdg-${randomChars}`;
+      this.username = `ewhls-${randomChars}`;
     }
   }
 

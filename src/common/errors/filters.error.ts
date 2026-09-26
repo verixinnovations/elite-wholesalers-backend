@@ -52,6 +52,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         ) {
           message = 'Validation Failed';
           statusMessage = 'Validation Error';
+          console.log(res);
           fieldErrors = res.message as FieldError[];
         }
         // Check for STANDARD NestJS validation (Array of strings - fail safe)
@@ -73,7 +74,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
       // Handle Postgres Unique Constraint (Code 23505)
       if ((exception as any).code === '23505') {
-        statusMessage = 'Conflict';
+        statusMessage = 'Duplicate Error';
         const match = (exception as any).detail.match(/\((.*?)\)=\((.*?)\)/);
         if (match) {
           fieldErrors = [

@@ -5,8 +5,8 @@ import { UserService } from '../../modules/user/user.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../../modules/user/entities/user.entity';
 import { Repository } from 'typeorm';
-import { UserRoles } from 'src/modules/user/dto/create-user.dto';
-import { EnvConfig } from 'src/common/config/env.config';
+import { EnvConfig } from '../../common/config/env.config';
+import { AccountType } from '../../modules/user/dto/create-user.dto';
 
 @Injectable()
 export class EmailService {
@@ -16,18 +16,18 @@ export class EmailService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
 
-  sendWelcomeEmail(email: string, name: string, role: UserRoles) {
+  sendWelcomeEmail(email: string, name: string, role: AccountType) {
     const frontendUrl = this.configService.get<string>(EnvConfig.FRONTEND_URL);
 
-    if (role === UserRoles.USER) {
+    if (role === AccountType.INDIVIDUAL) {
       const mailOptions = emailTemplateBuilder(
         'welcome-user.hbs',
         email,
-        'Welcome to Badge',
+        'Welcome to Elite Wholesalers',
         'Welcome',
         {
           name,
-          title: 'Welcome to Badge',
+          title: 'Welcome to Elite Wholesalers',
           url: `${frontendUrl}/dashboard/settings`,
         },
       );
@@ -36,11 +36,11 @@ export class EmailService {
       const mailOptions = emailTemplateBuilder(
         'welcome-recruiter.hbs',
         email,
-        'Welcome to Badge',
+        'Welcome to Elite Wholesalers',
         'Welcome',
         {
           name,
-          title: 'Welcome to Badge',
+          title: 'Welcome to Elite Wholesalers',
           url: `${frontendUrl}/dashboard/company`,
         },
       );
@@ -55,7 +55,7 @@ export class EmailService {
     const mailOptions = emailTemplateBuilder(
       'otp.hbs',
       email,
-      `Badge OTP - ${data.otp} is your verification code`,
+      `Elite Wholesalers OTP - ${data.otp} is your verification code`,
       'Verification',
       data,
     );
@@ -370,7 +370,7 @@ export class EmailService {
       'account-verified.hbs',
       email,
       'Account Verified',
-      'Welcome to Badge',
+      'Welcome to Elite Wholesalers',
       data,
     );
     return emailSenderConfig(mailOptions);

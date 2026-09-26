@@ -1,6 +1,6 @@
-export enum UserRoles {
-  USER = 'USER',
-  RECRUITER = 'RECRUITER',
+export enum AccountType {
+  TRADER = 'TRADER',
+  INDIVIDUAL = 'INDIVIDUAL',
   ADMIN = 'ADMIN',
 }
 
@@ -14,12 +14,13 @@ import {
   IsString,
   Matches,
   MinLength,
-  IsArray,
   IsDateString,
   ValidateNested,
-  MaxLength,
   IsPhoneNumber,
   IsNumber,
+  IsUrl,
+  IsIn,
+  ValidateIf,
 } from 'class-validator';
 
 // 1. Define the Location Object Structure
@@ -61,6 +62,68 @@ export class LocationDto {
   longitude: number;
 }
 
+const BUSINESS_TYPES = [
+  'partnership',
+  'sole_trader',
+  'company',
+  'trust',
+] as const;
+
+const AUS_STATES = [
+  'nsw',
+  'vic',
+  'qld',
+  'wa',
+  'sa',
+  'tas',
+  'act',
+  'nt',
+] as const;
+
+export class BusinessDetailsDto {
+  @ApiProperty({ example: '88172828288' })
+  @IsString()
+  @Matches(/^\d{11}$/, { message: 'ABN must be exactly 11 digits' })
+  abn: string;
+
+  @ApiProperty({ example: '663263273' })
+  @IsString()
+  @IsOptional()
+  @Matches(/^\d{9}$/, { message: 'ACN must be exactly 9 digits' })
+  acn?: string;
+
+  @ApiProperty({ example: 'ELITE WHOLESALERS' })
+  @IsString()
+  business_name: string;
+
+  @ApiProperty({ example: 'company' })
+  @IsString()
+  @IsIn(BUSINESS_TYPES, {
+    message: `business_type must be one of: ${BUSINESS_TYPES.join(', ')}`,
+  })
+  business_type: string;
+
+  @ApiProperty({ example: 'https://www.elitewholesalers.com' })
+  @IsOptional()
+  @IsUrl({}, { message: 'business_website must be a valid URL' })
+  business_website?: string;
+
+  @ApiProperty({ example: 'Agro-Allied' })
+  @IsString()
+  industry: string;
+
+  @ApiProperty({ example: '1765FC' })
+  @IsString()
+  license_number: string;
+
+  @ApiProperty({ example: 'nsw' })
+  @IsString()
+  @IsIn(AUS_STATES, {
+    message: `stateIssued must be one of: ${AUS_STATES.join(', ')}`,
+  })
+  stateIssued: string;
+}
+
 export class CreateUserDto {
   @ApiProperty({ example: 'Samson' })
   @IsString()
@@ -83,12 +146,12 @@ export class CreateUserDto {
   @IsOptional()
   username: string;
 
-  @ApiProperty({ example: UserRoles.USER })
-  @IsEnum(UserRoles, {
-    message: `role must be a valid enum value: ${Object.values(UserRoles).join(', ')}`,
+  @ApiProperty({ example: AccountType.INDIVIDUAL })
+  @IsEnum(AccountType, {
+    message: `role must be a valid enum value: ${Object.values(AccountType).join(', ')}`,
   })
   @IsOptional()
-  role: UserRoles;
+  accountType: AccountType;
 
   @ApiProperty({ example: 'samsonrealgreat@gmail.com' })
   @IsNotEmpty()
@@ -124,6 +187,17 @@ export class CreateUserDto {
   @IsDateString()
   date_of_birth?: string;
 
+  @ApiProperty({
+    required: false,
+    description: 'Required if accountType is TRADER',
+    type: () => BusinessDetailsDto,
+  })
+  @ValidateIf((object) => object.accountType === AccountType.TRADER)
+  @ValidateNested()
+  @Type(() => BusinessDetailsDto)
+  @IsNotEmpty()
+  business_details: BusinessDetailsDto;
+
   @ApiProperty({ type: LocationDto, required: false })
   @IsOptional()
   @ValidateNested() // Validates the object inside
@@ -134,45 +208,18 @@ export class CreateUserDto {
   @IsOptional()
   @IsString()
   bio?: string;
-
-  @ApiProperty({ example: 'Full detailed biography...', required: false })
-  @IsOptional()
-  @IsString()
-  rejectedJobs?: string;
-
-  @ApiProperty({ example: 'Software Engineer based in Lagos', required: false })
-  @IsOptional()
-  @IsString()
-  @MaxLength(150, { message: 'short bio is too long (max 150 chars)' })
-  short_bio?: string;
-
-  @ApiProperty({ example: ['TypeScript', 'NestJS', 'Vue'], required: false })
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  skills?: string[];
-
-  @ApiProperty({ example: ['Web Development', 'Consulting'], required: false })
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  services?: string[];
 }
 
 export class UserProfilePhotoDto {
   @ApiProperty({ type: 'string', format: 'binary' })
   picture: Express.Multer.File;
 }
-export class UserResumeDto {
-  @ApiProperty({ type: 'string', format: 'binary' })
-  resume: Express.Multer.File;
-}
 
 export class UpdateRoleDto {
-  @ApiProperty({ example: UserRoles.USER })
-  @IsEnum(UserRoles, {
-    message: `role must be a valid enum value: ${Object.values(UserRoles).join(', ')}`,
+  @ApiProperty({ example: AccountType.INDIVIDUAL })
+  @IsEnum(AccountType, {
+    message: `role must be a valid enum value: ${Object.values(AccountType).join(', ')}`,
   })
   @IsOptional()
-  role: UserRoles;
+  accountType: AccountType;
 }

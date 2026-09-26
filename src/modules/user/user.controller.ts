@@ -8,9 +8,6 @@ import {
   UseInterceptors,
   UploadedFile,
   Put,
-  ParseFilePipe,
-  FileTypeValidator,
-  MaxFileSizeValidator,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -20,11 +17,7 @@ import {
   ApiConsumes,
   ApiOperation,
 } from '@nestjs/swagger';
-import {
-  UpdateRoleDto,
-  UserProfilePhotoDto,
-  UserResumeDto,
-} from './dto/create-user.dto';
+import { UpdateRoleDto, UserProfilePhotoDto } from './dto/create-user.dto';
 import type { IRequest } from '../../common/interface';
 import { FileInterceptor } from '@nestjs/platform-express';
 
@@ -57,26 +50,6 @@ export class UserController {
     return this.userService.uploadPicture(req.user.id, file);
   }
 
-  @Put('resume')
-  @ApiConsumes('multipart/form-data')
-  @ApiOperation({ summary: 'Upload resume' })
-  @ApiBody({ description: 'Upload resume', type: UserResumeDto })
-  @UseInterceptors(FileInterceptor('resume'))
-  uploadResume(
-    @Req() req: IRequest,
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [
-          new FileTypeValidator({ fileType: 'application/pdf' }),
-          new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }),
-        ],
-      }),
-    )
-    file: Express.Multer.File,
-  ) {
-    return this.userService.uploadResume(req.user.id, file);
-  }
-
   @Put()
   @ApiOperation({ summary: 'Update user by ID' })
   update(@Req() req: IRequest, @Body() updateUserDto: UpdateUserDto) {
@@ -92,7 +65,7 @@ export class UserController {
   @Put('role')
   @ApiOperation({ summary: 'Update User Role ID' })
   updateRole(@Req() req: IRequest, @Body() userRole: UpdateRoleDto) {
-    return this.userService.updateUserRole(req.user.id, userRole.role);
+    return this.userService.updateUserRole(req.user.id, userRole.accountType);
   }
 
   @Get(':id')

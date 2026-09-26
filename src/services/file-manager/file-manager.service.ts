@@ -23,6 +23,7 @@ export class FileManagerService {
       };
     } else throw new BadGatewayException('Image upload failed');
   }
+
   async uploadResume(file: Express.Multer.File) {
     // 1. Strict PDF-only validation
     if (file.mimetype !== 'application/pdf') {

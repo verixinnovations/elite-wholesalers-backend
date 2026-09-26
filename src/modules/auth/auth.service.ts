@@ -40,7 +40,7 @@ export class AuthService {
     await this.emailService.sendWelcomeEmail(
       user.email,
       `${user.lastname} ${user.firstname}`,
-      user.role,
+      user.accountType,
     );
     const hashedPassword = await BcryptConfig.hashPassword(
       createUserDto.password,
@@ -52,14 +52,14 @@ export class AuthService {
   login(user: User): AuthResponse {
     const payload: JwtPayload = {
       username: user.username,
-      role: user.role,
+      accountType: user.accountType,
       sub: user.id,
     };
 
     return {
       id: user.id,
       user,
-      role: payload.role,
+      accountType: payload.accountType,
       access_token: this.jwtService.sign(payload),
     };
   }
@@ -139,7 +139,7 @@ export class AuthService {
         await this.emailService.sendWelcomeEmail(
           email!,
           `${family_name ?? ''} ${given_name ?? ''}`.trim(),
-          user.role,
+          user.accountType,
         );
       }
 

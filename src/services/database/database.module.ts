@@ -4,11 +4,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { User } from '../../modules/user/entities/user.entity';
 import { Verification } from '../../modules/auth/entities/auth.entity';
-import { Company } from '../../modules/company/entities/company.entity';
-import { Job } from '../../modules/jobs/entities/job.entity';
-import { JobApplication } from '../../modules/jobs/entities/job-applicants.entity';
-import { Bookmark } from '../../modules/jobs/entities/job-bookmark.entity';
-import { JobRejection } from 'src/modules/jobs/entities/job-rejected.entity';
+import { Product } from '../../modules/products/entities/product.entity';
+import { CartItem } from '../../modules/commerce/entities/cart-item.entity';
+import { OrderItem } from '../../modules/commerce/entities/order-item.entity';
+import { Order } from '../../modules/commerce/entities/order.entity';
+import { WishlistItem } from '../../modules/commerce/entities/wishlist-item.entity';
 
 @Module({
   imports: [
@@ -22,11 +22,11 @@ import { JobRejection } from 'src/modules/jobs/entities/job-rejected.entity';
         entities: [
           User,
           Verification,
-          Company,
-          Job,
-          Bookmark,
-          JobApplication,
-          JobRejection,
+          Product,
+          CartItem,
+          WishlistItem,
+          Order,
+          OrderItem,
         ],
         synchronize: true,
         dropSchema: false,
@@ -35,7 +35,7 @@ import { JobRejection } from 'src/modules/jobs/entities/job-rejected.entity';
           rejectUnauthorized: false,
         },
         extra: {
-          sslmode: 'verify-full',
+          sslmode: 'require',
           uselibpqcompat: true,
         },
       }),

@@ -1,5 +1,5 @@
 // import { Schema } from 'mongoose';
-import { User, UserRoles } from '../../modules/user/entities/user.entity';
+import { User, AccountType } from '../../modules/user/entities/user.entity';
 import { Request } from 'express';
 
 type ShallowCopy<T> = {
@@ -10,14 +10,14 @@ type ShallowCopy<T> = {
 
 export interface JwtPayload {
   username: string;
-  role: UserRoles;
+  accountType: AccountType;
   sub: string;
 }
 
 export interface AuthResponse {
   id?: string;
   user: ShallowCopy<User>;
-  role: UserRoles;
+  accountType: AccountType;
   access_token: string;
 }
 

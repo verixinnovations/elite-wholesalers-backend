@@ -14,8 +14,7 @@ import { RolesGuard } from './common/middleware/role-base-guard.middleware';
 /* MODULES */
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
-import { CompanyModule } from './modules/company/company.module';
-import { JobModule } from './modules/jobs/job.module';
+import { ProductsModule } from './modules/products/products.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { UtilsModule } from './modules/utils/utils.module';
 
@@ -24,7 +23,8 @@ import { EmailModule } from './services/emails/email.module';
 import { FileManagerModule } from './services/file-manager/file-manager.module';
 import { DatabaseModule } from './services/database/database.module';
 import { JsonWebTokenModule } from './services/json-web-token/json-web-token.module';
-import { RecruiterModule } from './modules/recruiter/recruiter.module';
+import { CommerceModule } from './modules/commerce/commerce.module';
+import { ZohoModule } from './modules/zoho/zoho.module';
 
 @Module({
   imports: [
@@ -35,12 +35,12 @@ import { RecruiterModule } from './modules/recruiter/recruiter.module';
     AuthModule,
     UserModule,
     PaymentModule,
-    CompanyModule,
     FileManagerModule,
-    JobModule,
+    ProductsModule,
     EmailModule,
     UtilsModule,
-    RecruiterModule,
+    CommerceModule,
+    ZohoModule,
   ],
   controllers: [AppController],
   providers: [

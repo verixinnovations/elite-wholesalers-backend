@@ -25,7 +25,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const requestUser = {
       id: payload.sub,
       username: payload.username,
-      role: payload.role,
+      accountType: payload.accountType,
     };
     return requestUser;
   }

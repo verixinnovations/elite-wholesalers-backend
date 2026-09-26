@@ -13,8 +13,26 @@ import {
   ClassSerializerInterceptor,
   ValidationPipe,
 } from '@nestjs/common';
+import { ValidationError } from 'class-validator';
 import { ResponseInterceptor } from './common/interceptors/response.interceptors';
 import { GlobalExceptionFilter } from './common/errors/filters.error';
+
+function flattenValidationErrors(
+  errors: ValidationError[],
+  parentPath = '',
+): { field: string; error: string[] }[] {
+  return errors.flatMap((validationError) => {
+    const field = parentPath
+      ? `${parentPath}.${validationError.property}`
+      : validationError.property;
+    const messages = Object.values(validationError.constraints || {});
+
+    return [
+      ...(messages.length ? [{ field, error: messages }] : []),
+      ...flattenValidationErrors(validationError.children || [], field),
+    ];
+  });
+}
 
 const swaggerOptions: SwaggerCustomOptions = {
   useGlobalPrefix: false,
@@ -26,7 +44,11 @@ const swaggerOptions: SwaggerCustomOptions = {
   customCss: 'swagger',
   // customCssUrl: ['/styles/scalar.css', '/styles/swagger.css'],
   // customfavIcon?: "";
-  customSiteTitle: 'Badge API Docs',
+  customSiteTitle: 'Elite Wholesalers API Docs',
+};
+
+(BigInt.prototype as any).toJSON = function () {
+  return this.toString();
 };
 
 async function bootstrap() {
@@ -38,10 +60,7 @@ async function bootstrap() {
       whitelist: true,
       transform: true,
       exceptionFactory: (errors) => {
-        const formattedErrors = errors.map((error) => ({
-          field: error.property,
-          error: Object.values(error.constraints || {}),
-        }));
+        const formattedErrors = flattenValidationErrors(errors);
         return new BadRequestException(formattedErrors);
       },
     }),
@@ -55,10 +74,10 @@ async function bootstrap() {
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImRyY29kZXMiLCJyb2xlIjoiVVNFUiIsInN1YiI6IjBlN2FiNjc2LTRhNGYtNGRiZS05NGNmLTJjMjBiNTBkMjA0NSIsImlhdCI6MTc3MzU1MTk1MiwiZXhwIjoxNzc0MTU2NzUyfQ.ugyKf3zSLVh3lkcS1w_tw7RwU_qJ_aLF1g_4vIrXCwI';
 
   const config = new DocumentBuilder()
-    .setTitle('Badge API')
-    .setDescription('Badge API documentation')
+    .setTitle('Elite Wholesalers API')
+    .setDescription('Elite Wholesalers API documentation')
     .setVersion('1.0')
-    .addTag('Badge API Documentation')
+    .addTag('Elite Wholesalers API Documentation')
     // .addBearerAuth(
     //   {
     //     type: 'http',
@@ -76,7 +95,11 @@ async function bootstrap() {
       name: 'authorization',
       'x-tokenName': BEARER_TOKEN,
     })
-    .setContact('Support', 'https://badge.com/support', '')
+    .setContact(
+      'Support',
+      process.env.SUPPORT_URL ?? 'https://elitewholesalers.com/support',
+      '',
+    )
     .setLicense('MIT', 'https://opensource.org/licenses/MIT')
     .addSecurityRequirements(SECURITY_NAME)
     .build();
@@ -92,11 +115,13 @@ async function bootstrap() {
       layout: 'modern',
 
       metaData: {
-        title: 'Badge Documentation',
-        description: 'API Documentation for Badge application.',
-        ogTitle: 'Badge Documentation',
-        ogDescription: 'API Documentation for Badge application.',
-        ogImage: 'https://example.com/image.png',
+        title: 'Elite Wholesalers Documentation',
+        description: 'API Documentation for Elite Wholesalers.',
+        ogTitle: 'Elite Wholesalers Documentation',
+        ogDescription: 'API Documentation for Elite Wholesalers.',
+        ogImage:
+          process.env.DOCUMENTATION_IMAGE_URL ??
+          'https://elitewholesalers.com/og-image.png',
         twitterCard: 'summary_large_image',
       },
       authentication: {
@@ -120,7 +145,7 @@ async function bootstrap() {
   app.setBaseViewsDir(join(__dirname, '..', 'views'));
   app.setViewEngine('hbs');
 
-  await app.listen(process.env.PORT ?? 3001);
+  await app.listen(process.env.PORT ?? 3000);
 }
 
 bootstrap()

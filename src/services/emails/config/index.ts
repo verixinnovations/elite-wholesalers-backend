@@ -40,10 +40,17 @@ export const emailTemplateBuilder = (
   const layoutGenerator = handlebars.compile(layoutSource);
 
   // Pass the data PLUS the newly compiled body
-  const html = layoutGenerator({ ...data, pageHeading, body: bodyHtml });
+  const html = layoutGenerator({
+    ...data,
+    pageHeading,
+    body: bodyHtml,
+    brandUrl: process.env.ELITE_WHOLESALERS_URL ?? 'https://elitewholesalers.com',
+  });
 
   return {
-    from: 'Badge <support@connectwithbadge.com>',
+    from:
+      process.env.EMAIL_FROM ??
+      'Elite Wholesalers <support@elitewholesalers.com>',
     to: email,
     subject,
     html,
