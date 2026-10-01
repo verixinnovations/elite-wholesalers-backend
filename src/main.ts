@@ -12,6 +12,7 @@ import {
   BadRequestException,
   ClassSerializerInterceptor,
   ValidationPipe,
+  Logger,
 } from '@nestjs/common';
 import { ValidationError } from 'class-validator';
 import { ResponseInterceptor } from './common/interceptors/response.interceptors';
@@ -55,6 +56,18 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.setGlobalPrefix('api');
   app.enableCors();
+
+  // {
+  //   origin: [
+  //     'http://localhost:3000',
+  //     'http://localhost:5173',
+  //     'https://elite-wholesalers-frontend.vercel.app',
+  //   ],
+  //   credentials: false,
+  //   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  //   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  // }
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -145,13 +158,18 @@ async function bootstrap() {
   app.setBaseViewsDir(join(__dirname, '..', 'views'));
   app.setViewEngine('hbs');
 
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT ?? 5050);
 }
 
+const logger = new Logger('StartUpLoader');
+
+const BLUE = '\x1b[34m';
 bootstrap()
   .then(() => {
-    console.log('Application is running on port', process.env.PORT ?? 3000);
+    logger.log(
+      'Application is running on port: ' + BLUE + (process.env.PORT ?? 5050),
+    );
   })
   .catch((err) => {
-    console.error('Error during application bootstrap:', err);
+    logger.error('Error during application bootstrap:', err);
   });

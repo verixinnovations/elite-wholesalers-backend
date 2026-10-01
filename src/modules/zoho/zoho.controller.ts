@@ -1,7 +1,6 @@
 import { Controller } from '@nestjs/common';
-import { ZohoService } from './zoho.service';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Zoho')
 @Controller('zoho')
-export class ZohoController {
-  constructor(private readonly zohoCrmService: ZohoService) {}
-}
+export class ZohoController {}

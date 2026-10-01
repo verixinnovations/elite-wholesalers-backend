@@ -52,7 +52,6 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         ) {
           message = 'Validation Failed';
           statusMessage = 'Validation Error';
-          console.log(res);
           fieldErrors = res.message as FieldError[];
         }
         // Check for STANDARD NestJS validation (Array of strings - fail safe)

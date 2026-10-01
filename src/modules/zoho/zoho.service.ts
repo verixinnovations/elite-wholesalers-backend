@@ -32,7 +32,10 @@ export class ZohoService {
       config.headers = config.headers || {};
       config.headers.Authorization = `Zoho-oauthtoken ${accessToken}`;
 
-      if (config.url?.includes('/inventory/')) {
+      if (
+        config.url?.includes('/inventory/') ||
+        config.url?.includes('/storefront/')
+      ) {
         config.params = config.params || {};
         config.params.organization_id = this.configService.get<string>(
           'ZOHO_INVENTORY_ORG_ID',
@@ -49,10 +52,8 @@ export class ZohoService {
         config.url?.includes('/storefront/') ||
         config.url?.includes('/store/')
       ) {
-        // Commerce uses a different subdomain than CRM/Inventory
         config.baseURL = 'https://commerce.zoho.com';
 
-        // Commerce requires your storefront domain in the headers
         const domainName = this.configService.get<string>(
           'ZOHO_COMMERCE_DOMAIN',
         );
@@ -63,7 +64,6 @@ export class ZohoService {
         }
         config.headers['domain-name'] = domainName;
       }
-
       return config;
     });
   }

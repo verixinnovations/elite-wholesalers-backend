@@ -4,14 +4,12 @@ import {
   Delete,
   Get,
   Param,
-  Patch,
   Post,
   Req,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Public } from '../../common/decorators';
 import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductsService } from './products.service';
 
 @ApiTags('Products')
@@ -27,21 +25,18 @@ export class ProductsController {
     return this.productsService.findAll();
   }
 
+  @Get('/featured')
+  @Public()
+  @ApiOperation({ summary: 'List featured products' })
+  @ApiResponse({ status: 200, type: [CreateProductDto] })
+  getFeaturedProducts() {
+    return this.productsService.getFeaturedProducts();
+  }
+
   @Post()
   @ApiOperation({ summary: 'Store a product from the external catalog' })
   create(@Body() product: CreateProductDto) {
     return this.productsService.create(product);
-  }
-
-  @Post('sync')
-  @ApiOperation({ summary: 'Upsert products from the external catalog' })
-  sync(@Body() products: CreateProductDto[]) {
-    return this.productsService.upsertMany(products);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() product: UpdateProductDto) {
-    return this.productsService.update(id, product);
   }
 
   @Delete(':id')
@@ -51,7 +46,7 @@ export class ProductsController {
 
   @Get('categories')
   @Public()
-  @ApiOperation({ summary: 'List product categories' })
+  @ApiOperation({ summary: 'List products categories' })
   @ApiResponse({ status: 200, type: [String] })
   async getCategories(@Req() req) {
     const categories = await this.productsService.getProductCategories();
@@ -60,6 +55,29 @@ export class ProductsController {
       image:
         req.protocol + '://' + req.headers.host + `/products${category.image}`,
     }));
+  }
+
+  @Get('categories/:id')
+  @Public()
+  @ApiOperation({ summary: 'List products subcategories by categoryId' })
+  @ApiResponse({ status: 200, type: [String] })
+  getSubCategories(@Param('id') id: string, @Req() req) {
+    const hostUrl = req.protocol + '://' + req.headers.host + '/products';
+    const categories = this.productsService.getProductSubCategories(
+      id,
+      hostUrl,
+    );
+    return categories;
+  }
+
+  @Get('categories/:categoryId/products')
+  @Public()
+  @ApiOperation({ summary: 'List products by categoryId' })
+  @ApiResponse({ status: 200, type: [String] })
+  async getProductsByCategory(@Param('categoryId') categoryId: string) {
+    const categories =
+      await this.productsService.getProductByCategoryId(categoryId);
+    return categories;
   }
 
   @Get(':id')
