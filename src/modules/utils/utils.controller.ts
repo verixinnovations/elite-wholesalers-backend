@@ -3,11 +3,22 @@ import { UtilsService } from './utils.service';
 import { Public } from '../../common/decorators';
 import { VerifyAbnDto, VerifyLicenseDto } from './dto/verify.dto';
 import { ApiOperation } from '@nestjs/swagger';
+import { UserService } from '../user/user.service';
+import { CheckDuplicateUserDto } from '../user/dto/create-user.dto';
 
 @Controller('utils')
 @Public()
 export class UtilsController {
-  constructor(private readonly utilsService: UtilsService) {}
+  constructor(
+    private readonly utilsService: UtilsService,
+    private readonly userService: UserService,
+  ) {}
+
+  @Get('check-duplicates')
+  @ApiOperation({ summary: 'Check duplicate user info' })
+  checkDuplicates(@Query() query: CheckDuplicateUserDto) {
+    return this.userService.checkDuplicateUserInfo(query);
+  }
 
   @Get('verify-abn')
   @ApiOperation({ summary: 'Verify ABN' })

@@ -138,7 +138,7 @@ export class AuthService {
   async forgotPassword(email: string) {
     try {
       const verification_code = uniqueNumber.generateOtp().toString();
-      const user = await this.userService.findOne({ email });
+      const user = await this.userRepository.findOne({ where: { email } });
       if (user) {
         const verificationCreated = await this.createVerificationCode(
           user.id,
@@ -255,8 +255,6 @@ export class AuthService {
     await this.verificationRepository.delete({ userId: user.id });
     return { message: 'Password reset successfully' };
   }
-
-  async checkDuplicateUserInfo() {}
 }
 
 // @Cron(CronExpression.EVERY_MINUTE) // Runs every 60 seconds

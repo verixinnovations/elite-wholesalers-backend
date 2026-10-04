@@ -231,3 +231,19 @@ export class UpdateRoleDto {
   @IsOptional()
   accountType: AccountType;
 }
+
+export class CheckDuplicateUserDto {
+  @IsOptional()
+  @IsEmail({}, { message: 'Please provide a valid email address.' })
+  email?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty({ message: 'Phone number cannot be empty.' })
+  phone_number?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty({ message: 'Username cannot be empty.' })
+  username?: string;
+}

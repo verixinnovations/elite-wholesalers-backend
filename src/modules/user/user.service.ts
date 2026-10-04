@@ -1,10 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, Repository } from 'typeorm';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { FileManagerService } from '../../services/file-manager/file-manager.service';
-import { AccountType } from './dto/create-user.dto';
+import { AccountType, CheckDuplicateUserDto } from './dto/create-user.dto';
 import { ZohoInventoryService } from '../zoho/zoho-inventory.service';
 
 @Injectable()
@@ -108,5 +112,36 @@ export class UserService {
     }
 
     return result;
+  }
+
+  async checkDuplicateUserInfo(data: CheckDuplicateUserDto) {
+    const conditions: any = [];
+
+    if (data.email) conditions.push({ email: data.email.trim().toLowerCase() });
+    if (data.phone_number)
+      conditions.push({ phone_number: data.phone_number.trim() });
+    if (data.username) conditions.push({ user_name: data.username.trim() });
+
+    if (conditions.length === 0) {
+      return { is_available: true };
+    }
+
+    // Find any user matching ANY of the provided fields
+    const user = await this.userRepository.findOne({ where: conditions });
+
+    if (user) {
+      if (data.email && user.email === data.email.trim().toLowerCase()) {
+        throw new BadRequestException('Email already exists!');
+      }
+      if (data.phone_number && user.phone_number === data.phone_number.trim()) {
+        throw new BadRequestException('Phone number already exists!');
+      }
+      if (data.username && user.username === data.username.trim()) {
+        throw new BadRequestException('Username already exists!');
+      }
+      throw new BadRequestException('User information already exists!');
+    }
+
+    return { is_available: true };
   }
 }
