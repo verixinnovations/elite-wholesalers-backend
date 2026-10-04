@@ -2,16 +2,21 @@ import fs from 'fs';
 import path from 'path';
 import handlebars from 'handlebars';
 import { CreateEmailOptions, Resend } from 'resend';
+import { Logger } from '@nestjs/common';
+
+const EmailLogger = new Logger('EmailModule');
 
 export const emailSenderConfig = async (
   options: CreateEmailOptions,
 ): Promise<boolean> => {
   const resend = new Resend(process.env.RESEND_API_KEY);
 
-  const { error } = await resend.emails.send(options);
+  const { error, data } = await resend.emails.send(options);
+  EmailLogger.log({ error, data });
   if (error) {
     return false;
   }
+
   return true;
 };
 
@@ -44,13 +49,14 @@ export const emailTemplateBuilder = (
     ...data,
     pageHeading,
     body: bodyHtml,
-    brandUrl: process.env.ELITE_WHOLESALERS_URL ?? 'https://elitewholesalers.com',
+    brandUrl:
+      process.env.ELITE_WHOLESALERS_URL ?? 'https://verixinnovations.com',
   });
 
   return {
     from:
       process.env.EMAIL_FROM ??
-      'Elite Wholesalers <support@elitewholesalers.com>',
+      'Elite Wholesalers <support@verixinnovations.com>',
     to: email,
     subject,
     html,

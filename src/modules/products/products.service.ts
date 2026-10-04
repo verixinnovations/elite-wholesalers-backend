@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateProductDto } from './dto/create-product.dto';
+import { CreateProductDto, ProductQueryDto } from './dto/create-product.dto';
 import { Product } from './entities/product.entity';
 import { ZohoInventoryService } from '../zoho/zoho-inventory.service';
 import { ProductEntity } from '../zoho/zoho-interface';
@@ -26,8 +26,8 @@ export class ProductsService {
     );
   }
 
-  async findAll() {
-    const products = await this.zohoInventoryService.getInventoryItems();
+  async findAll(params?: ProductQueryDto) {
+    const products = await this.zohoInventoryService.getInventoryItems(params);
     return products;
   }
   async getFeaturedProducts() {
@@ -66,6 +66,7 @@ export class ProductsService {
       hostUrl,
     );
   }
+
   getProductByCategoryId(categoryId: string) {
     return this.zohoInventoryService.getProductsByCategoryId(categoryId);
   }

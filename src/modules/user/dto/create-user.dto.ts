@@ -4,7 +4,7 @@ export enum AccountType {
   ADMIN = 'ADMIN',
 }
 
-import { Type } from 'class-transformer';
+import { Exclude, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,
@@ -46,9 +46,11 @@ export class LocationDto {
   country: string;
 
   @IsOptional()
+  @ApiProperty({ example: 320345 })
   postal_code?: string | number;
 
   @IsOptional()
+  @ApiProperty({ example: 47837 })
   zip_code?: string | number;
 
   @ApiProperty({ example: 7.45 })
@@ -125,6 +127,12 @@ export class BusinessDetailsDto {
 }
 
 export class CreateUserDto {
+  @Exclude()
+  @ApiProperty({ example: '674p-d930-382n-2dfa' })
+  @IsOptional()
+  @IsString()
+  id: string;
+
   @ApiProperty({ example: 'Samson' })
   @IsString()
   @MinLength(2, { message: 'firstname must have atleast 2 characters.' })
@@ -153,9 +161,9 @@ export class CreateUserDto {
   @IsOptional()
   accountType: AccountType;
 
-  @ApiProperty({ example: 'samsonrealgreat@gmail.com' })
+  @ApiProperty({ example: 'samsonrealgreat+18@gmail.com' })
   @IsNotEmpty()
-  @IsEmail({}, { message: 'please provide valid Email.' })
+  @IsEmail({}, { message: 'Please provide valid Email.' })
   email: string;
 
   @ApiProperty({ example: '#StrongPass@1' })
@@ -176,7 +184,7 @@ export class CreateUserDto {
   @IsOptional()
   gender?: string;
 
-  @ApiProperty({ example: '+2348012345678', required: false })
+  @ApiProperty({ example: '+2348012345478', required: false })
   @IsOptional()
   @IsPhoneNumber()
   @IsString()
@@ -200,11 +208,11 @@ export class CreateUserDto {
 
   @ApiProperty({ type: LocationDto, required: false })
   @IsOptional()
-  @ValidateNested() // Validates the object inside
+  @ValidateNested()
   @Type(() => LocationDto)
   location?: LocationDto;
 
-  @ApiProperty({ example: 'Full detailed biography...', required: false })
+  @ApiProperty({ example: 'Full detailed bio...', required: false })
   @IsOptional()
   @IsString()
   bio?: string;

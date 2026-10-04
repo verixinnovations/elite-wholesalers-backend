@@ -25,6 +25,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const requestUser = {
       id: payload.sub,
       username: payload.username,
+      zohoContactId: payload.zohoContactId,
       accountType: payload.accountType,
     };
     return requestUser;

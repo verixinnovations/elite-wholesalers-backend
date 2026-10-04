@@ -8,11 +8,13 @@ import { LocalStrategy } from './utils/local.strategy';
 import { JwtStrategy } from './utils/jwt.stategy';
 import { EmailModule } from '../../services/emails/email.module';
 import { Verification } from './entities/auth.entity';
+import { ZohoModule } from '../zoho/zoho.module';
 
 @Module({
   imports: [
     UserModule,
     EmailModule,
+    ZohoModule,
     TypeOrmModule.forFeature([User, Verification]),
   ],
   controllers: [AuthController],

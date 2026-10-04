@@ -289,6 +289,10 @@ export interface ProductEntity {
   tax_category_name: string;
   tags: string[];
   product_tax_category: ProductTaxCategory;
+  price: {
+    amount: number;
+    currency: Currency.AUD;
+  };
 }
 
 export type ProductVariant = Omit<ProductEntity, 'variants'> & {
@@ -357,4 +361,13 @@ export interface Attributes {
   attribute_type1?: string;
   attribute_type2?: string;
   attribute_type3?: string;
+}
+
+interface InvoicePayload {
+  customer_id: string;
+  line_items: {
+    item_id: string;
+    quantity: number;
+    rate: number;
+  }[];
 }

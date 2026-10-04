@@ -5,9 +5,10 @@ import { UserController } from './user.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { FileManagerModule } from '../../services/file-manager/file-manager.module';
+import { ZohoModule } from '../zoho/zoho.module';
 
 @Module({
-  imports: [FileManagerModule, TypeOrmModule.forFeature([User])],
+  imports: [FileManagerModule, ZohoModule, TypeOrmModule.forFeature([User])],
   controllers: [UserController],
   providers: [UserService],
   exports: [UserService],

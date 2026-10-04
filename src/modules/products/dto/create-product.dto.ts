@@ -50,7 +50,7 @@ export class ProductQueryDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  search?: string;
+  name_contains?: string;
 
   @ApiProperty({ required: false, default: 1 })
   @IsOptional()

@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
+import { ExtractJwt } from 'passport-jwt';
 import { IS_PUBLIC_KEY } from '../decorators';
 
 @Injectable()
@@ -18,6 +19,16 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const req = context.switchToHttp().getRequest();
 
     if (req.method === 'OPTIONS') {
+      return true;
+    }
+
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    const token = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
+
+    if (isPublic && !token) {
       return true;
     }
 

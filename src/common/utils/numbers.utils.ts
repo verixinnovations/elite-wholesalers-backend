@@ -1,8 +1,7 @@
 export enum Currency {
-  NGN = 'NGN',
+  AUD = 'AUD',
   USD = 'USD',
   EUR = 'EUR',
-  GBP = 'GBP',
 }
 
 export const NumberFunctions = {
@@ -24,7 +23,7 @@ export const NumberFunctions = {
     }).format(num);
   },
 
-  formatCurrency(value: number, currency = `${Currency.NGN}`) {
+  formatCurrency(value: number, currency = `${Currency.AUD}`) {
     const formattedNumber = Number(value);
     const formatter = new Intl.NumberFormat('en-US', {
       style: 'currency',

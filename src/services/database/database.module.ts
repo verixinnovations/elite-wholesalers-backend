@@ -34,6 +34,8 @@ import { WishlistItem } from '../../modules/commerce/entities/wishlist-item.enti
         ssl: {
           rejectUnauthorized: false,
         },
+        uselibpqcompat: true,
+        sslmode: 'require',
         extra: {
           sslmode: 'require',
           uselibpqcompat: true,

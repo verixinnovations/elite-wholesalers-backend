@@ -25,6 +25,7 @@ import { DatabaseModule } from './services/database/database.module';
 import { JsonWebTokenModule } from './services/json-web-token/json-web-token.module';
 import { CommerceModule } from './modules/commerce/commerce.module';
 import { ZohoModule } from './modules/zoho/zoho.module';
+import { CartModule } from './modules/cart/cart.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { ZohoModule } from './modules/zoho/zoho.module';
     UtilsModule,
     CommerceModule,
     ZohoModule,
+    CartModule,
   ],
   controllers: [AppController],
   providers: [

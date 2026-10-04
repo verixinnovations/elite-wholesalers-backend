@@ -11,13 +11,15 @@ type ShallowCopy<T> = {
 export interface JwtPayload {
   username: string;
   accountType: AccountType;
+  zohoContactId: string;
   sub: string;
 }
 
 export interface AuthResponse {
-  id?: string;
+  id: string;
   user: ShallowCopy<User>;
   accountType: AccountType;
+  zohoContactId: string;
   access_token: string;
 }
 

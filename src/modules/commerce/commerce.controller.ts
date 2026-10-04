@@ -23,7 +23,7 @@ import { CommerceService } from './commerce.service';
 export class CommerceController {
   constructor(private readonly commerceService: CommerceService) {}
 
-  @Get('cart')
+  @Get('transactions')
   @ApiOperation({ summary: 'Get the current user cart' })
   getCart(@Req() req: IRequest) {
     return this.commerceService.getCart(req.user.id);

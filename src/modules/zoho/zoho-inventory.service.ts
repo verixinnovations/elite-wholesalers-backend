@@ -1,9 +1,14 @@
-// src/modules/zoho/zoho.service.ts
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ZohoService } from './zoho.service';
 import { ZohoApiClient } from './zoho-api.util';
 import { categoriesData } from './custom-data';
-import type { CategoryEntity, ProductEntity } from './zoho-interface';
+import type {
+  CategoryEntity,
+  InvoicePayload,
+  ProductEntity,
+} from './zoho-interface';
+import { ProductQueryDto } from '../products/dto/create-product.dto';
+import { CreateContactDto } from './dto/create-zoho-user.dto';
 
 @Injectable()
 export class ZohoInventoryService {
@@ -22,17 +27,52 @@ export class ZohoInventoryService {
     );
   }
 
-  async getInventoryItems(): Promise<ProductEntity[]> {
-    const data = await this.commerceApi.get<{ products: ProductEntity[] }>(
-      '/products',
+  async createCustomer(data: CreateContactDto): Promise<any> {
+    const { contact } = await this.inventoryApi.post('/contacts', data, {
+      headers: { 'Content-Type': 'application/json' },
+    });
+    return contact;
+  }
+
+  async getCustomer(contactId: string): Promise<any> {
+    const { contact } = await this.inventoryApi.get(`/contacts/${contactId}`);
+    return contact;
+  }
+
+  async createSalesOrder(data: InvoicePayload) {
+    const { salesorder } = await this.inventoryApi.post('/salesorders', data);
+    return salesorder;
+  }
+
+  async createInvoice(data: InvoicePayload) {
+    const { invoice } = await this.inventoryApi.post('/invoices', data, {
+      headers: { 'Content-Type': 'application/json' },
+      params: { send: true },
+    });
+    return invoice;
+  }
+
+  async markInvoiceAsSent(invoiceId: string) {
+    const { invoice } = await this.inventoryApi.post(
+      `/invoices/${invoiceId}/status/sent`,
+    );
+    return invoice;
+  }
+
+  async getInventoryItems(
+    searchQuery?: ProductQueryDto,
+  ): Promise<ProductEntity[]> {
+    const data = await this.inventoryApi.get<{ items: ProductEntity[] }>(
+      '/items',
       {
         params: {
           per_page: 100,
           filter_by: 'Status.Active',
+          ...searchQuery,
         },
       },
     );
-    return data.products;
+    return data.items.filter((item) => item.show_in_storefront === true);
   }
 
   async getFeaturedInventoryItems(): Promise<ProductEntity[]> {
@@ -54,7 +94,7 @@ export class ZohoInventoryService {
   }
 
   async getInventoryItem(productId: string): Promise<ProductEntity> {
-    const data = await this.commerceApi.get<{ item: ProductEntity }>(
+    const data = await this.inventoryApi.get<{ item: ProductEntity }>(
       `/items/${productId}`,
     );
     return data.item;
@@ -117,12 +157,6 @@ export class ZohoInventoryService {
       },
       subCategories,
     };
-  }
-
-  async getInventoryItemImageStream(itemId: string) {
-    return await this.inventoryApi.get(`/items/${itemId}/image`, {
-      responseType: 'stream',
-    });
   }
 
   async getProductsByCategoryId(categoryId?: string) {

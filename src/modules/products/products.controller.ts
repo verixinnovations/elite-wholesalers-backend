@@ -1,16 +1,9 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Post,
-  Req,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Query, Req } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Public } from '../../common/decorators';
-import { CreateProductDto } from './dto/create-product.dto';
+import { CreateProductDto, ProductQueryDto } from './dto/create-product.dto';
 import { ProductsService } from './products.service';
+import { generatePriceByAccountType } from '../../common/utils/price-generator.utils';
 
 @ApiTags('Products')
 @Controller('products')
@@ -21,27 +14,20 @@ export class ProductsController {
   @Public()
   @ApiOperation({ summary: 'List products' })
   @ApiResponse({ status: 200, type: [CreateProductDto] })
-  findAll() {
-    return this.productsService.findAll();
+  async findAll(@Req() req, @Query() query?: ProductQueryDto) {
+    const products = await this.productsService.findAll(query);
+    return products.map(generatePriceByAccountType(req?.user?.accountType));
   }
 
   @Get('/featured')
   @Public()
   @ApiOperation({ summary: 'List featured products' })
   @ApiResponse({ status: 200, type: [CreateProductDto] })
-  getFeaturedProducts() {
-    return this.productsService.getFeaturedProducts();
-  }
-
-  @Post()
-  @ApiOperation({ summary: 'Store a product from the external catalog' })
-  create(@Body() product: CreateProductDto) {
-    return this.productsService.create(product);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.productsService.remove(id);
+  async getFeaturedProducts(@Req() req) {
+    const featuredProducts = await this.productsService.getFeaturedProducts();
+    return featuredProducts.map(
+      generatePriceByAccountType(req?.user?.accountType),
+    );
   }
 
   @Get('categories')
@@ -74,16 +60,25 @@ export class ProductsController {
   @Public()
   @ApiOperation({ summary: 'List products by categoryId' })
   @ApiResponse({ status: 200, type: [String] })
-  async getProductsByCategory(@Param('categoryId') categoryId: string) {
-    const categories =
+  async getProductsByCategory(
+    @Req() req,
+    @Param('categoryId') categoryId: string,
+  ) {
+    const productsByCategoryId =
       await this.productsService.getProductByCategoryId(categoryId);
-    return categories;
+    return productsByCategoryId.map(
+      generatePriceByAccountType(req?.user?.accountType),
+    );
   }
 
   @Get(':id')
   @Public()
   @ApiOperation({ summary: 'Get a product by external ID' })
-  findOne(@Param('id') id: string) {
-    return this.productsService.findOne(id);
+  async findOne(@Req() req, @Param('id') id: string) {
+    const product = await this.productsService.findOne(id);
+    const productWithPrice = [product].map(
+      generatePriceByAccountType(req?.user?.accountType),
+    );
+    return productWithPrice[0];
   }
 }

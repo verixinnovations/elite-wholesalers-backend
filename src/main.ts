@@ -84,24 +84,24 @@ async function bootstrap() {
   // app.useGlobalPipes(new ValidationPipe());
   const SECURITY_NAME = 'Access-Token';
   const BEARER_TOKEN =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImRyY29kZXMiLCJyb2xlIjoiVVNFUiIsInN1YiI6IjBlN2FiNjc2LTRhNGYtNGRiZS05NGNmLTJjMjBiNTBkMjA0NSIsImlhdCI6MTc3MzU1MTk1MiwiZXhwIjoxNzc0MTU2NzUyfQ.ugyKf3zSLVh3lkcS1w_tw7RwU_qJ_aLF1g_4vIrXCwI';
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImV3aGxzLTYwMWZ3Z3VsIiwiYWNjb3VudFR5cGUiOiJJTkRJVklEVUFMIiwiem9ob0NvbnRhY3RJZCI6IjE5NjkyNDAwMDAwMzgzODUwNzMiLCJzdWIiOiJhNzQ1NjgxNS1iODc1LTQ3NjEtOTRmYi1mNTVhZmVkMGFlOTUiLCJpYXQiOjE3OTExMDA4ODgsImV4cCI6MTc5MTcwNTY4OH0.KLkdYlIwklX9ABRK1awcAi6jxheonQUFprwb5s9S20Y';
 
   const config = new DocumentBuilder()
     .setTitle('Elite Wholesalers API')
     .setDescription('Elite Wholesalers API documentation')
     .setVersion('1.0')
     .addTag('Elite Wholesalers API Documentation')
-    // .addBearerAuth(
-    //   {
-    //     type: 'http',
-    //     scheme: 'bearer',
-    //     bearerFormat: 'JWT',
-    //     name: 'Authorization',
-    //     description: BEARER_TOKEN,
-    //     in: 'header',
-    //   },
-    //   SECURITY_NAME,
-    // )
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'Authorization',
+        description: BEARER_TOKEN,
+        in: 'header',
+      },
+      SECURITY_NAME,
+    )
     .addBearerAuth({
       type: 'http',
       scheme: 'bearer',
@@ -148,10 +148,10 @@ async function bootstrap() {
       },
       persistAuth: true,
 
-      // customCss: `
-      // // @import url('https://fonts.googleapis.com/css2?family=Stack+Sans+Text:wght@200..700&display=swap');
-      // // :root { --scalar-font: 'Stack Sans Text', sans-serif;}
-      // `,
+      customCss: `
+      // @import url('https://fonts.googleapis.com/css2?family=Stack+Sans+Text:wght@200..700&display=swap');
+      // :root { --scalar-font: 'Stack Sans Text', sans-serif;}
+      `,
     }),
   );
   app.useStaticAssets(join(__dirname, '..', 'public'));

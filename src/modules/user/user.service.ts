@@ -5,11 +5,13 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { FileManagerService } from '../../services/file-manager/file-manager.service';
 import { AccountType } from './dto/create-user.dto';
+import { ZohoInventoryService } from '../zoho/zoho-inventory.service';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly fileManagerService: FileManagerService,
+    private readonly zohoInventoryService: ZohoInventoryService,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
 
@@ -17,10 +19,14 @@ export class UserService {
     return this.userRepository.find();
   }
 
-  async findOne(param: object): Promise<User> {
+  async findOne(param: object) {
     const user = await this.userRepository.findOneBy(param);
     if (!user) throw new NotFoundException('User not found');
-    return user;
+    const zohoDetails = await this.zohoInventoryService.getCustomer(
+      user.zohoContactId,
+    );
+
+    return { ...user, zoho_details: zohoDetails };
   }
 
   async viewUser(userId: string) {
