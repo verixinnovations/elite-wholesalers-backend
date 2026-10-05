@@ -44,11 +44,38 @@ export class ZohoInventoryService {
     return salesorder;
   }
 
+  async findUserOrders(customer_id: string) {
+    const { salesorders } = await this.inventoryApi.get(`/salesorders/`, {
+      params: { customer_id },
+    });
+    return salesorders;
+  }
+
+  async findSalesOrder(salesorderId: string) {
+    const { salesorder } = await this.inventoryApi.get(
+      `/salesorders/${salesorderId}`,
+    );
+    return salesorder;
+  }
+
   async createInvoice(data: InvoicePayload) {
     const { invoice } = await this.inventoryApi.post('/invoices', data, {
       headers: { 'Content-Type': 'application/json' },
       params: { send: true },
     });
+    return invoice;
+  }
+
+  async getInvoice(invoiceId: string) {
+    const { invoice } = await this.inventoryApi.get(`/invoices/${invoiceId}`);
+    return invoice;
+  }
+
+  async updateInvoice(invoiceId: string, data: object) {
+    const { invoice } = await this.inventoryApi.put(
+      `/invoices/${invoiceId}`,
+      data,
+    );
     return invoice;
   }
 
@@ -104,6 +131,7 @@ export class ZohoInventoryService {
     const { categories } = await this.commerceApi.get<{
       categories: CategoryEntity[];
     }>('/categories');
+    console.log({ categories: categories.length });
     const activeCategories = categories.filter(
       (category) =>
         category.parent_category_id === '-1' &&
@@ -125,11 +153,7 @@ export class ZohoInventoryService {
   async getInventorySubCategories(categoryId: string, hostUrl: string) {
     const { categories } = await this.inventoryApi.get<{
       categories: CategoryEntity[];
-    }>('/categories', {
-      params: {
-        parent_category_id: categoryId,
-      },
-    });
+    }>('/categories');
 
     const subCategories = categories.filter(
       (category) =>
@@ -155,8 +179,24 @@ export class ZohoInventoryService {
         image: extraData?.image ? hostUrl + extraData.image : null,
         description: extraData?.summary ?? parentCategory.description ?? '',
       },
-      subCategories,
+      subCategories: subCategories.map((subCat) => {
+        const has_sub_categories = categories.some(
+          (cat) => cat.parent_category_id === subCat.category_id,
+        );
+        return {
+          ...subCat,
+          has_sub_categories,
+        };
+      }),
     };
+  }
+
+  async getInventoryCategory(categoryId: string) {
+    const { category } = await this.inventoryApi.get<{
+      category: CategoryEntity;
+    }>(`/categories/${categoryId}`);
+
+    return category;
   }
 
   async getProductsByCategoryId(categoryId?: string) {

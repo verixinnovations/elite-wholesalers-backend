@@ -45,6 +45,23 @@ export class ZohoApiClient {
     }
   }
 
+  public async put<T = any>(
+    endpoint: string,
+    data?: any,
+    config?: AxiosRequestConfig,
+  ): Promise<T> {
+    try {
+      const response = await this.axiosInstance.put<T>(
+        `${this.basePath}${endpoint}`,
+        data,
+        config,
+      );
+      return response.data;
+    } catch (error) {
+      this.handleError(error, 'PUT', endpoint);
+    }
+  }
+
   private handleError(error: any, method: string, endpoint: string): never {
     if (error instanceof AxiosError) {
       const statusCode = error.response?.status || 500;

@@ -15,7 +15,6 @@ import { RolesGuard } from './common/middleware/role-base-guard.middleware';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { ProductsModule } from './modules/products/products.module';
-import { PaymentModule } from './modules/payment/payment.module';
 import { UtilsModule } from './modules/utils/utils.module';
 
 /* SERVICES */
@@ -35,7 +34,6 @@ import { CartModule } from './modules/cart/cart.module';
     JsonWebTokenModule,
     AuthModule,
     UserModule,
-    PaymentModule,
     FileManagerModule,
     ProductsModule,
     EmailModule,

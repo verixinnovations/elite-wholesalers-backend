@@ -7,6 +7,7 @@ import {
   ValidateNested,
   IsEnum,
   IsNotEmpty,
+  IsPositive,
 } from 'class-validator';
 
 export enum Currency {
@@ -17,7 +18,7 @@ export enum Currency {
 
 export class PriceDto {
   @ApiProperty({ example: 120.5 })
-  @IsNumber()
+  @IsPositive()
   @Min(0)
   amount: number;
 
@@ -38,7 +39,6 @@ export class CreateCartDto {
   @Min(1)
   quantity = 1;
 
-  // 2. Use ValidateNested for the nested object
   @ApiProperty({ type: () => PriceDto })
   @ValidateNested()
   @Type(() => PriceDto)

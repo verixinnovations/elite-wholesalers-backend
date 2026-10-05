@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateProductDto, ProductQueryDto } from './dto/create-product.dto';
+import { ProductQueryDto } from './dto/create-product.dto';
 import { Product } from './entities/product.entity';
 import { ZohoInventoryService } from '../zoho/zoho-inventory.service';
 import { ProductEntity } from '../zoho/zoho-interface';
@@ -14,17 +14,17 @@ export class ProductsService {
     private zohoInventoryService: ZohoInventoryService,
   ) {}
 
-  async create(createProductDto: CreateProductDto): Promise<Product> {
-    return this.productRepository.save(
-      this.productRepository.create(createProductDto),
-    );
-  }
+  // async create(createProductDto: CreateProductDto): Promise<Product> {
+  //   return this.productRepository.save(
+  //     this.productRepository.create(createProductDto),
+  //   );
+  // }
 
-  async upsertMany(products: CreateProductDto[]): Promise<Product[]> {
-    return this.productRepository.save(
-      products.map((product) => this.productRepository.create(product)),
-    );
-  }
+  // async upsertMany(products: CreateProductDto[]): Promise<Product[]> {
+  //   return this.productRepository.save(
+  //     products.map((product) => this.productRepository.create(product)),
+  //   );
+  // }
 
   async findAll(params?: ProductQueryDto) {
     const products = await this.zohoInventoryService.getInventoryItems(params);
@@ -65,6 +65,10 @@ export class ProductsService {
       categoryId,
       hostUrl,
     );
+  }
+
+  getProductCategory(categoryId: string) {
+    return this.zohoInventoryService.getInventoryCategory(categoryId);
   }
 
   getProductByCategoryId(categoryId: string) {

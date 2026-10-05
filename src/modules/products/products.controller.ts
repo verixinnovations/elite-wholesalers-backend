@@ -47,6 +47,14 @@ export class ProductsController {
   @Public()
   @ApiOperation({ summary: 'List products subcategories by categoryId' })
   @ApiResponse({ status: 200, type: [String] })
+  getSubCategory(@Param('id') id: string) {
+    return this.productsService.getProductCategory(id);
+  }
+
+  @Get('categories/:id/subcategories')
+  @Public()
+  @ApiOperation({ summary: 'List products subcategories by categoryId' })
+  @ApiResponse({ status: 200, type: [String] })
   getSubCategories(@Param('id') id: string, @Req() req) {
     const hostUrl = req.protocol + '://' + req.headers.host + '/products';
     const categories = this.productsService.getProductSubCategories(
