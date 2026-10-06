@@ -92,24 +92,19 @@ export class EmailService {
     return emailSenderConfig(mailOptions);
   }
 
-  // New Application Received (Employer)
-  async sendNewApplicationEmail(
-    email: string,
-    data: {
-      employerName: string;
-      jobTitle: string;
-      candidateName: string;
-      shortBio: string;
-      applicationDate: string;
-      coverLetter: string;
-      applicationLink: string;
-    },
-  ) {
+  async sendContactUsMessage(data: {
+    firstname: string;
+    lastname: string;
+    phone_number?: string;
+    message: string;
+    email: string;
+  }) {
     const mailOptions = emailTemplateBuilder(
-      'new-candidate.hbs',
-      email,
-      'New Application Received',
-      'New Application',
+      'contact-us.hbs',
+      // 'info@elitewholesalers.com.au',
+      'samsonrealgreat@gmail.com',
+      'New Message from Website',
+      `A new Message`,
       data,
     );
     return emailSenderConfig(mailOptions);

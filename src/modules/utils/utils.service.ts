@@ -7,6 +7,9 @@ import {
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { AustralianState } from './dto/verify.dto';
+import { supportedCountries } from './data/utils-data';
+import { ContactUsDto } from './dto/contact-us.dto';
+import { EmailService } from '../../services/emails/email.service';
 interface LicenceTokenCache {
   accessToken: null | string;
   apikey: null | string;
@@ -15,13 +18,52 @@ interface LicenceTokenCache {
 
 @Injectable()
 export class UtilsService {
-  constructor(private configService: ConfigService) {}
+  constructor(
+    private configService: ConfigService,
+    private emailService: EmailService,
+  ) {}
 
   private tokenCache: LicenceTokenCache = {
     accessToken: null,
     apikey: null,
     expiresAt: 0,
   };
+
+  private readonly baseUrl = 'https://api.countrystatecity.in/v1';
+
+  private async restCountryApi(endpoint: string) {
+    const restCountryApiKey = this.configService.get<string>(
+      'REST_COUNTRY_API_KEY',
+    );
+    try {
+      const response = await axios.get(`${this.baseUrl}/${endpoint}`, {
+        headers: { 'X-CSCAPI-KEY': restCountryApiKey },
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error(
+        `Failed to fetch from Country State API: ${error.message}`,
+      );
+    }
+  }
+
+  getSupportedCountries() {
+    return supportedCountries;
+  }
+
+  async getStatesByCountry(countryCode: string = 'AU') {
+    return this.restCountryApi(`countries/${countryCode}/states`);
+  }
+
+  async getCitiesByState(countryCode: string, stateCode: string) {
+    return this.restCountryApi(
+      `countries/${countryCode}/states/${stateCode}/cities`,
+    );
+  }
+
+  async sendContactUsMessage(data: ContactUsDto) {
+    return await this.emailService.sendContactUsMessage(data);
+  }
 
   async fetchABNDetails(abn: string) {
     const abnVerifyURL = this.configService.get<string>('ABN_VERIFY_URL');
@@ -52,7 +94,7 @@ export class UtilsService {
       });
 
       if (data && data.Message) {
-        throw new BadRequestException(`ABN Lookup Failed: ${data.Message}`);
+        throw new BadRequestException(`${data.Message}`);
       }
 
       return data;

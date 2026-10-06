@@ -114,9 +114,7 @@ export class ZohoInventoryService {
     );
 
     return data.items
-      .filter(
-        (item) => item.show_in_storefront === true && item.available_stock > 1,
-      )
+      .filter((item) => item.show_in_storefront === true)
       .slice(0, 8);
   }
 
@@ -153,7 +151,7 @@ export class ZohoInventoryService {
   async getInventorySubCategories(categoryId: string, hostUrl: string) {
     const { categories } = await this.inventoryApi.get<{
       categories: CategoryEntity[];
-    }>('/categories');
+    }>('/categories', { params: { filter_by: 'ShowInMenu' } });
 
     const subCategories = categories.filter(
       (category) =>
@@ -196,6 +194,9 @@ export class ZohoInventoryService {
       category: CategoryEntity;
     }>(`/categories/${categoryId}`);
 
+    if (category && Array.isArray(category.children)) {
+      category.children = category.children.filter((child) => child.visibility);
+    }
     return category;
   }
 

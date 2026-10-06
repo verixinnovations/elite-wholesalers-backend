@@ -316,6 +316,8 @@ export interface CategoryEntity {
   category_id: string;
   has_active_items: boolean;
   name: string;
+  children: CategoryEntity[];
+  ancestors: CategoryEntity[];
   ondc_category_type_formatted: string;
   image: string | null;
 }

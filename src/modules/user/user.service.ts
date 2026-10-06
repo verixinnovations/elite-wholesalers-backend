@@ -8,7 +8,7 @@ import { DeleteResult, Repository } from 'typeorm';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { FileManagerService } from '../../services/file-manager/file-manager.service';
-import { AccountType, CheckDuplicateUserDto } from './dto/create-user.dto';
+import { AccountType } from './dto/create-user.dto';
 import { ZohoInventoryService } from '../zoho/zoho-inventory.service';
 
 @Injectable()
@@ -114,32 +114,46 @@ export class UserService {
     return result;
   }
 
-  async checkDuplicateUserInfo(data: CheckDuplicateUserDto) {
-    const conditions: any = [];
-
-    if (data.email) conditions.push({ email: data.email.trim().toLowerCase() });
-    if (data.phone_number)
-      conditions.push({ phone_number: data.phone_number.trim() });
-    if (data.username) conditions.push({ user_name: data.username.trim() });
-
-    if (conditions.length === 0) {
+  async checkDuplicateField(field: string, value: any) {
+    if (!value) {
       return { is_available: true };
     }
 
-    // Find any user matching ANY of the provided fields
-    const user = await this.userRepository.findOne({ where: conditions });
+    const processedValue = typeof value === 'string' ? value.trim() : value;
+    const queryBuilder = this.userRepository.createQueryBuilder('user');
+
+    if (field.includes('.')) {
+      // Handles nested JSON/JSONB fields like 'business_details.licence_number'
+      const [parent, child] = field.split('.');
+
+      // Uses Postgres JSON operator (->>) and LOWER() for case-insensitive matching
+      queryBuilder.where(`LOWER(user.${parent} ->> :childKey) = LOWER(:val)`, {
+        childKey: child,
+        val: processedValue,
+      });
+    } else {
+      // Handles flat columns with optional mapping (e.g. username -> user_name)
+      const fieldMapping: Record<string, string> = { username: 'user_name' };
+      const dbColumn = fieldMapping[field] || field;
+
+      queryBuilder.where(`LOWER(user.${dbColumn}) = LOWER(:val)`, {
+        val: processedValue,
+      });
+    }
+
+    // Execute query
+    const user = await queryBuilder.getOne();
 
     if (user) {
-      if (data.email && user.email === data.email.trim().toLowerCase()) {
-        throw new BadRequestException('Email already exists!');
-      }
-      if (data.phone_number && user.phone_number === data.phone_number.trim()) {
-        throw new BadRequestException('Phone number already exists!');
-      }
-      if (data.username && user.username === data.username.trim()) {
-        throw new BadRequestException('Username already exists!');
-      }
-      throw new BadRequestException('User information already exists!');
+      const lastField = field.includes('.') ? field.split('.').pop() : field;
+      const readableField = lastField!.replace(/_/g, ' ');
+      const formattedField =
+        readableField.charAt(0).toUpperCase() + readableField.slice(1);
+
+      throw new BadRequestException({
+        message: `${formattedField} already exists!`,
+        error_code: `DUPLICATE_${lastField!.toUpperCase()}`,
+      });
     }
 
     return { is_available: true };

@@ -21,6 +21,7 @@ import {
   IsUrl,
   IsIn,
   ValidateIf,
+  IsDefined,
 } from 'class-validator';
 
 // 1. Define the Location Object Structure
@@ -232,18 +233,26 @@ export class UpdateRoleDto {
   accountType: AccountType;
 }
 
-export class CheckDuplicateUserDto {
-  @IsOptional()
-  @IsEmail({}, { message: 'Please provide a valid email address.' })
-  email?: string;
-
-  @IsOptional()
+export class CheckDuplicateDto {
   @IsString()
-  @IsNotEmpty({ message: 'Phone number cannot be empty.' })
-  phone_number?: string;
+  @IsNotEmpty()
+  field: string;
 
-  @IsOptional()
+  @IsDefined()
+  @IsNotEmpty()
+  value: any;
+}
+export class SupportedStatesDto {
   @IsString()
-  @IsNotEmpty({ message: 'Username cannot be empty.' })
-  username?: string;
+  @IsNotEmpty({ message: 'Country is required.' })
+  country: string;
+}
+export class SupportedCitiesDto {
+  @IsString()
+  @IsNotEmpty({ message: 'Country is required.' })
+  country: string;
+
+  @IsString()
+  @IsNotEmpty({ message: 'State is required.' })
+  state: string;
 }
