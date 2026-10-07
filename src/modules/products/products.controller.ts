@@ -4,6 +4,7 @@ import { Public } from '../../common/decorators';
 import { CreateProductDto, ProductQueryDto } from './dto/create-product.dto';
 import { ProductsService } from './products.service';
 import { generatePriceByAccountType } from '../../common/utils/price-generator.utils';
+import type { IRequest } from '../../common/interface';
 
 @ApiTags('Products')
 @Controller('products')
@@ -14,7 +15,7 @@ export class ProductsController {
   @Public()
   @ApiOperation({ summary: 'List products' })
   @ApiResponse({ status: 200, type: [CreateProductDto] })
-  async findAll(@Req() req, @Query() query?: ProductQueryDto) {
+  async findAll(@Req() req: IRequest, @Query() query?: ProductQueryDto) {
     const products = await this.productsService.findAll(query);
     return products.map(generatePriceByAccountType(req?.user?.accountType));
   }
@@ -23,7 +24,7 @@ export class ProductsController {
   @Public()
   @ApiOperation({ summary: 'List featured products' })
   @ApiResponse({ status: 200, type: [CreateProductDto] })
-  async getFeaturedProducts(@Req() req) {
+  async getFeaturedProducts(@Req() req: IRequest) {
     const featuredProducts = await this.productsService.getFeaturedProducts();
     return featuredProducts.map(
       generatePriceByAccountType(req?.user?.accountType),
@@ -34,7 +35,7 @@ export class ProductsController {
   @Public()
   @ApiOperation({ summary: 'List products categories' })
   @ApiResponse({ status: 200, type: [String] })
-  async getCategories(@Req() req) {
+  async getCategories(@Req() req: IRequest) {
     const categories = await this.productsService.getProductCategories();
     return categories.map((category) => ({
       ...category,
@@ -55,7 +56,7 @@ export class ProductsController {
   @Public()
   @ApiOperation({ summary: 'List products subcategories by categoryId' })
   @ApiResponse({ status: 200, type: [String] })
-  getSubCategories(@Param('id') id: string, @Req() req) {
+  getSubCategories(@Param('id') id: string, @Req() req: IRequest) {
     const hostUrl = req.protocol + '://' + req.headers.host + '/products';
     const categories = this.productsService.getProductSubCategories(
       id,
@@ -69,11 +70,12 @@ export class ProductsController {
   @ApiOperation({ summary: 'List products by categoryId' })
   @ApiResponse({ status: 200, type: [String] })
   async getProductsByCategory(
-    @Req() req,
+    @Req() req: IRequest,
     @Param('categoryId') categoryId: string,
+    @Query() query?: ProductQueryDto,
   ) {
     const productsByCategoryId =
-      await this.productsService.getProductByCategoryId(categoryId);
+      await this.productsService.getProductByCategoryId(categoryId, query);
     return productsByCategoryId.map(
       generatePriceByAccountType(req?.user?.accountType),
     );
@@ -81,8 +83,8 @@ export class ProductsController {
 
   @Get(':id')
   @Public()
-  @ApiOperation({ summary: 'Get a product by external ID' })
-  async findOne(@Req() req, @Param('id') id: string) {
+  @ApiOperation({ summary: 'Get a product by ID' })
+  async findOne(@Req() req: IRequest, @Param('id') id: string) {
     const product = await this.productsService.findOne(id);
     const productWithPrice = [product].map(
       generatePriceByAccountType(req?.user?.accountType),

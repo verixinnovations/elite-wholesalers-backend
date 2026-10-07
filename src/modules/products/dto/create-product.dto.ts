@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  IsEnum,
   IsNumber,
   IsOptional,
   IsString,
@@ -46,6 +47,19 @@ export class CreateProductDto {
   wishlistVariantId: string;
 }
 
+export type ProductSortColumn =
+  | 'name'
+  | 'sku'
+  | 'rate'
+  | 'purchase_rate'
+  | 'created_time'
+  | 'last_modified_time'
+  | 'reorder_level'
+  | 'stock_on_hand';
+
+// 2. Define sort order as a type
+export type ProductSortOrder = 'A' | 'D';
+
 export class ProductQueryDto {
   @ApiProperty({ required: false })
   @IsOptional()
@@ -57,12 +71,46 @@ export class ProductQueryDto {
   @Type(() => Number)
   @IsNumber()
   @Min(1)
-  page = 1;
+  page: number = 1;
 
-  @ApiProperty({ required: false, default: 20 })
+  @ApiProperty({ required: false, default: 200 })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(1)
-  limit = 20;
+  per_page: number = 200;
+
+  @ApiProperty({
+    required: false,
+    default: 'name',
+    enum: [
+      'name',
+      'sku',
+      'rate',
+      'purchase_rate',
+      'created_time',
+      'last_modified_time',
+      'reorder_level',
+      'stock_on_hand',
+    ],
+  })
+  @IsOptional()
+  @IsString()
+  @IsEnum([
+    'name',
+    'sku',
+    'rate',
+    'purchase_rate',
+    'created_time',
+    'last_modified_time',
+    'reorder_level',
+    'stock_on_hand',
+  ])
+  sort_column?: ProductSortColumn = 'name';
+
+  @ApiProperty({ required: false, default: 'D', enum: ['A', 'D'] })
+  @IsOptional()
+  @IsString()
+  @IsEnum(['A', 'D'])
+  sort_order?: ProductSortOrder = 'D';
 }

@@ -71,7 +71,10 @@ export class ProductsService {
     return this.zohoInventoryService.getInventoryCategory(categoryId);
   }
 
-  getProductByCategoryId(categoryId: string) {
-    return this.zohoInventoryService.getProductsByCategoryId(categoryId);
+  getProductByCategoryId(categoryId: string, params?: ProductQueryDto) {
+    return this.zohoInventoryService.getProductsByCategoryId(
+      categoryId,
+      params,
+    );
   }
 }
