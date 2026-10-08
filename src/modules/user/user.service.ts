@@ -85,17 +85,6 @@ export class UserService {
     return this.userRepository.save(user);
   }
 
-  // async uploadResume(userId: string, file: Express.Multer.File) {
-  //   const user = await this.viewUser(userId);
-  //   const resume = await this.fileManagerService.uploadResume(file);
-  //   user.resume = {
-  //     name: resume.name,
-  //     url: resume.url,
-  //     format: resume.format,
-  //   };
-  //   return this.userRepository.save(user);
-  // }
-
   /**
    * this function is used to remove or delete user from database.
    * @param id is the type of number, which represent id of user
@@ -105,7 +94,6 @@ export class UserService {
   async removeUser(id: string): Promise<DeleteResult> {
     const result: DeleteResult = await this.userRepository.softDelete(id);
 
-    // In practice, affected is 0 when no rows are deleted; it is almost never null
     // However, the type allows null, so we handle affected === 0 || affected === null
     if (!result.affected) {
       throw new NotFoundException(`User with ID ${id} not found`);

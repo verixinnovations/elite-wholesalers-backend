@@ -34,6 +34,20 @@ export class ZohoInventoryService {
     return contact;
   }
 
+  async uploadProductSpecs(
+    productId: string,
+    productUrl: string,
+  ): Promise<any> {
+    const payload = {
+      custom_fields: [{ label: 'product_specs', value: productUrl }],
+    };
+
+    return await this.inventoryApi.put(
+      `/item/${productId}/customfields`,
+      payload,
+    );
+  }
+
   async getCustomer(contactId: string): Promise<any> {
     const { contact } = await this.inventoryApi.get(`/contacts/${contactId}`);
     return contact;
@@ -102,6 +116,38 @@ export class ZohoInventoryService {
     return data.items.filter((item) => item.show_in_storefront === true);
   }
 
+  async getAdminInventoryItems(
+    searchQuery?: ProductQueryDto,
+  ): Promise<{ products: ProductEntity[] }> {
+    const { items, ...data } = await this.inventoryApi.get<{
+      items: ProductEntity[];
+    }>('/items', {
+      params: {
+        per_page: 100,
+        filter_by: 'Status.Active',
+        ...searchQuery,
+      },
+    });
+
+    const products = items.filter((item) => item.show_in_storefront === true);
+
+    return {
+      products,
+      ...data,
+    };
+  }
+
+  async getAdminInventoryCategories(): Promise<CategoryEntity[]> {
+    const { categories } = await this.commerceApi.get<{
+      categories: CategoryEntity[];
+    }>('/categories', {
+      params: {
+        include_root_category: false,
+      },
+    });
+    return categories.filter((item) => item.visibility === true);
+  }
+
   async getFeaturedInventoryItems(): Promise<ProductEntity[]> {
     const data = await this.inventoryApi.get<{ items: ProductEntity[] }>(
       '/items',
@@ -128,8 +174,11 @@ export class ZohoInventoryService {
   async getInventoryCategories(): Promise<CategoryEntity[]> {
     const { categories } = await this.commerceApi.get<{
       categories: CategoryEntity[];
-    }>('/categories');
-    console.log({ categories: categories.length });
+    }>('/categories', {
+      params: {
+        include_root_category: false,
+      },
+    });
     const activeCategories = categories.filter(
       (category) =>
         category.parent_category_id === '-1' &&

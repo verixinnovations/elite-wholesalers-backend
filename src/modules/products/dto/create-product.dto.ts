@@ -66,6 +66,11 @@ export class ProductQueryDto {
   @IsString()
   name_contains?: string;
 
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  category_id?: string;
+
   @ApiProperty({ required: false, default: 1 })
   @IsOptional()
   @Type(() => Number)

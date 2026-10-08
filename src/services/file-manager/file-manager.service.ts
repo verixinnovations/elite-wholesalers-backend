@@ -4,7 +4,6 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { CloudinaryService } from 'nestjs-cloudinary';
-import { Express } from 'express';
 
 @Injectable()
 export class FileManagerService {
@@ -12,7 +11,7 @@ export class FileManagerService {
   async uploadImage(file: Express.Multer.File) {
     const result = await this.cloudinaryService.uploadFile(file, {
       resource_type: 'auto',
-      folder: 'images',
+      folder: 'profile-images',
     });
     if (result.secure_url) {
       return {
@@ -24,27 +23,28 @@ export class FileManagerService {
     } else throw new BadGatewayException('Image upload failed');
   }
 
-  async uploadResume(file: Express.Multer.File) {
-    // 1. Strict PDF-only validation
+  async uploadProductSpecs(file: Express.Multer.File) {
     if (file.mimetype !== 'application/pdf') {
       throw new BadRequestException(
-        'Invalid file format. Only PDF documents are accepted as resumes.',
+        'Invalid file format. Only PDF documents are accepted as productSpecs.',
       );
     }
     const result = await this.cloudinaryService.uploadFile(file, {
       resource_type: 'auto',
-      folder: 'resumes',
+      folder: 'product-specs',
     });
 
     if (result.secure_url) {
       return {
-        url: result.secure_url,
+        url: result.secure_url as string,
         publicId: result.public_id,
         format: 'pdf',
         name: file.originalname,
       };
     } else {
-      throw new BadGatewayException('Resume upload failed');
+      throw new BadGatewayException(
+        'Product specs upload failed upload failed',
+      );
     }
   }
 }

@@ -64,7 +64,6 @@ export class ZohoService {
         }
         config.headers['domain-name'] = domainName;
       }
-      this.logger.log({ url: axios.getUri(config) });
       return config;
     });
   }

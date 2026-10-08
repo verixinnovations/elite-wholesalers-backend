@@ -25,6 +25,7 @@ import { JsonWebTokenModule } from './services/json-web-token/json-web-token.mod
 import { CommerceModule } from './modules/commerce/commerce.module';
 import { ZohoModule } from './modules/zoho/zoho.module';
 import { CartModule } from './modules/cart/cart.module';
+import { AdminModule } from './modules/admin/admin.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { CartModule } from './modules/cart/cart.module';
     CommerceModule,
     ZohoModule,
     CartModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [
