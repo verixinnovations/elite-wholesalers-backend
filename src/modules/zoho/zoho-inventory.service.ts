@@ -252,9 +252,9 @@ export class ZohoInventoryService {
   async getProductsByCategoryId(categoryId?: string, params?: ProductQueryDto) {
     const { items: products } = await this.inventoryApi.get(`/items/`, {
       params: {
-        category_id: categoryId,
         filter_by: 'Status.Active',
         ...params,
+        category_id: categoryId,
       },
     });
     return products.filter(
