@@ -10,6 +10,7 @@ import {
   SupportedStatesDto,
 } from '../user/dto/create-user.dto';
 import { ContactUsDto } from './dto/contact-us.dto';
+import { FirmwareService } from '../firmware/firmware.service';
 
 @Controller('utils')
 @Public()
@@ -17,6 +18,7 @@ export class UtilsController {
   constructor(
     private readonly utilsService: UtilsService,
     private readonly userService: UserService,
+    private readonly firmwareService: FirmwareService,
   ) {}
 
   @Get('countries')
@@ -30,6 +32,13 @@ export class UtilsController {
   getStatesByCountries(@Query() query: SupportedStatesDto) {
     return this.utilsService.getStatesByCountry(query.country);
   }
+
+  @Get('firmware-updates')
+  @ApiOperation({ summary: 'Get all firmware categories with nested items' })
+  findAllCategories() {
+    return this.firmwareService.findAllCategories();
+  }
+
   @Get('cities')
   @ApiOperation({ summary: 'Get Supported Countries' })
   getCitiesByState(@Query() query: SupportedCitiesDto) {
