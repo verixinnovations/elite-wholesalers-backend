@@ -18,4 +18,9 @@ export class AdminService {
       uploadFile.url,
     );
   }
+
+  async deleteProductSpecs(productId: string) {
+    await this.zohoInventoryService.clearProductSpecs(productId);
+    // const uploadFile = await this.fileManagerService.deleteFile(specsUrl);
+  }
 }

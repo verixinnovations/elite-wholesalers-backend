@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -10,6 +11,7 @@ import { User } from './entities/user.entity';
 import { FileManagerService } from '../../services/file-manager/file-manager.service';
 import { AccountType } from './dto/create-user.dto';
 import { ZohoInventoryService } from '../zoho/zoho-inventory.service';
+import { ZohoPayloadGenerator } from '../zoho/dto/user-generator';
 
 @Injectable()
 export class UserService {
@@ -18,6 +20,8 @@ export class UserService {
     private readonly zohoInventoryService: ZohoInventoryService,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
+
+  private readonly logger = new Logger(UserService.name);
 
   findAllUser(): Promise<User[]> {
     return this.userRepository.find();
@@ -53,6 +57,7 @@ export class UserService {
   async updateUser(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { email, password, username, accountType, ...data } = updateUserDto;
+
     const user = await this.userRepository.preload({
       id,
       ...data,
@@ -62,7 +67,24 @@ export class UserService {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
-    return this.userRepository.save(user);
+    const updatedUser = await this.userRepository.save(user);
+
+    if (updatedUser.zohoContactId) {
+      try {
+        const payload =
+          ZohoPayloadGenerator.generateContactUpdatePayload(updatedUser);
+        await this.zohoInventoryService.updateCustomer(
+          updatedUser.zohoContactId,
+          payload,
+        );
+      } catch (error) {
+        this.logger.error(
+          `Failed to update Zoho contact for user ${id}: ${error.message}`,
+        );
+      }
+    }
+
+    return updatedUser;
   }
 
   async updateUserRole(id: string, accountType: AccountType): Promise<User> {
@@ -75,7 +97,27 @@ export class UserService {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
-    return this.userRepository.save(user);
+    const updatedUser = await this.userRepository.save(user);
+
+    if (updatedUser.zohoContactId) {
+      try {
+        const payload = ZohoPayloadGenerator.generateCustomFieldUpdatePayload(
+          2,
+          'AccountType',
+          accountType,
+        );
+        await this.zohoInventoryService.updateCustomer(
+          updatedUser.zohoContactId,
+          payload,
+        );
+      } catch (error) {
+        this.logger.error(
+          `Failed to update Zoho role for user ${id}: ${error.message}`,
+        );
+      }
+    }
+
+    return updatedUser;
   }
 
   async uploadPicture(userId: string, file: Express.Multer.File) {
@@ -92,11 +134,26 @@ export class UserService {
    */
 
   async removeUser(id: string): Promise<DeleteResult> {
+    const user = await this.userRepository.findOne({ where: { id } });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
     const result: DeleteResult = await this.userRepository.softDelete(id);
 
-    // However, the type allows null, so we handle affected === 0 || affected === null
     if (!result.affected) {
       throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    if (user.zohoContactId) {
+      try {
+        await this.zohoInventoryService.deleteCustomer(user.zohoContactId);
+      } catch (error) {
+        this.logger.error(
+          `Failed to delete Zoho contact for user ${id}: ${error.message}`,
+        );
+      }
     }
 
     return result;

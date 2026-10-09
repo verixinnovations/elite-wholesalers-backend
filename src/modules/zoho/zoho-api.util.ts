@@ -62,6 +62,21 @@ export class ZohoApiClient {
     }
   }
 
+  public async delete<T = any>(
+    endpoint: string,
+    config?: AxiosRequestConfig,
+  ): Promise<T> {
+    try {
+      const response = await this.axiosInstance.delete<T>(
+        `${this.basePath}${endpoint}`,
+        config,
+      );
+      return response.data;
+    } catch (error) {
+      this.handleError(error, 'DELETE', endpoint);
+    }
+  }
+
   private handleError(error: any, method: string, endpoint: string): never {
     if (error instanceof AxiosError) {
       const statusCode = error.response?.status || 500;
@@ -71,7 +86,7 @@ export class ZohoApiClient {
         error.message;
 
       this.logger.error(
-        `[${method} ${this.basePath}${endpoint}] - Status: ${statusCode} - ${errorMsg}`,
+        `[${method} ${this.basePath}${endpoint}] - Status: ${statusCode} ${errorMsg}`,
       );
       throw new Error(`Zoho API Error (${statusCode}): ${errorMsg}`);
     } else {

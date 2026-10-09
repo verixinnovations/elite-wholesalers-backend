@@ -1,5 +1,7 @@
+// src/utils/zoho-payload-generator.util.ts
 import { CreateUserDto, AccountType } from '../../user/dto/create-user.dto';
 import { ContactType, CreateContactDto } from './create-zoho-user.dto';
+
 interface customFieldIndicies {
   user_id: number;
   account_type: number;
@@ -15,7 +17,6 @@ export class ZohoPayloadGenerator {
    * @param userDto The incoming user registration payload
    * @param customFieldIndices Map your Zoho Custom Field index numbers here
    */
-
   static generateContactCreationPayload(
     userDto: CreateUserDto,
     customFieldIndices: customFieldIndicies = {
@@ -106,5 +107,43 @@ export class ZohoPayloadGenerator {
     }
 
     return payload;
+  }
+
+  /**
+   * Generates a payload to update an existing Zoho contact using their contact ID.
+   * (Usually shares the same structural properties as the creation payload in Zoho)
+   */
+  static generateContactUpdatePayload(
+    userDto: CreateUserDto,
+    customFieldIndices: customFieldIndicies = {
+      user_id: 1,
+      account_type: 2,
+      abn: 3,
+      acn: 4,
+      licence_number: 5,
+    },
+  ): CreateContactDto {
+    // Reuses the creation pattern since Zoho update bodies typically mirror creation fields
+    return this.generateContactCreationPayload(userDto, customFieldIndices);
+  }
+
+  /**
+   * Generates a payload to update *just* a specific custom field (e.g., account type / role).
+   * Useful when sending a partial update payload to Zoho.
+   */
+  static generateCustomFieldUpdatePayload(
+    fieldIndex: number,
+    fieldLabel: string,
+    value: any,
+  ) {
+    return {
+      custom_fields: [
+        {
+          index: fieldIndex,
+          label: fieldLabel,
+          value: value,
+        },
+      ],
+    };
   }
 }

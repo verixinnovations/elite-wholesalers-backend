@@ -14,18 +14,6 @@ export class ProductsService {
     private zohoInventoryService: ZohoInventoryService,
   ) {}
 
-  // async create(createProductDto: CreateProductDto): Promise<Product> {
-  //   return this.productRepository.save(
-  //     this.productRepository.create(createProductDto),
-  //   );
-  // }
-
-  // async upsertMany(products: CreateProductDto[]): Promise<Product[]> {
-  //   return this.productRepository.save(
-  //     products.map((product) => this.productRepository.create(product)),
-  //   );
-  // }
-
   async findAll(params?: ProductQueryDto) {
     const products = await this.zohoInventoryService.getInventoryItems(params);
     return products;
@@ -41,15 +29,6 @@ export class ProductsService {
     if (!product) throw new NotFoundException('Product not found');
     return product;
   }
-
-  // async update(
-  //   id: string,
-  //   updateProductDto: UpdateProductDto,
-  // ): Promise<Product> {
-  //   const product = await this.findOne(id);
-  //   this.productRepository.merge(product, updateProductDto);
-  //   return this.productRepository.save(product);
-  // }
 
   async remove(id: string): Promise<void> {
     const result = await this.productRepository.delete(id);

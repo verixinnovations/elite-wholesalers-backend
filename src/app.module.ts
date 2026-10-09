@@ -26,6 +26,7 @@ import { CommerceModule } from './modules/commerce/commerce.module';
 import { ZohoModule } from './modules/zoho/zoho.module';
 import { CartModule } from './modules/cart/cart.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { FirmwareModule } from './modules/firmware/firmware.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { AdminModule } from './modules/admin/admin.module';
     ZohoModule,
     CartModule,
     AdminModule,
+    FirmwareModule,
   ],
   controllers: [AppController],
   providers: [

@@ -29,7 +29,7 @@ export class AdminController {
     private readonly zohoInventoryService: ZohoInventoryService,
   ) {}
 
-  @Post('/products/:productId/upload-specs')
+  @Post('/products/:productId/product-specs')
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Upload product specs' })
   @ApiBody({ description: 'Upload product specs', type: ProductSpecsDto })
@@ -39,6 +39,12 @@ export class AdminController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     return this.adminService.uploadProductSpecs(productId, file);
+  }
+
+  @Delete('/products/:productId/product-specs')
+  @ApiOperation({ summary: 'Delete product specs by ID' })
+  deleteProductSpecs(@Param('productId') productId: string) {
+    return this.adminService.deleteProductSpecs(productId);
   }
 
   @Get('/products')
@@ -61,13 +67,16 @@ export class AdminController {
 
   @Put('/users/:userId/role')
   @ApiOperation({ summary: 'Update User Role ID' })
-  updateRole(@Param('userId') userId: string, @Body() userRole: UpdateRoleDto) {
+  updateRoleByAdmin(
+    @Param('userId') userId: string,
+    @Body() userRole: UpdateRoleDto,
+  ) {
     return this.userService.updateUserRole(userId, userRole.accountType);
   }
 
   @Delete('/users/:userId')
   @ApiOperation({ summary: 'Delete user by ID' })
-  remove(@Param('userId') userId: string) {
+  removeUserByAdmin(@Param('userId') userId: string) {
     return this.userService.removeUser(userId);
   }
 }

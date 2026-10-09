@@ -34,14 +34,47 @@ export class ZohoInventoryService {
     return contact;
   }
 
+  async updateCustomer(
+    contactId: string,
+    data: Partial<CreateContactDto>,
+  ): Promise<any> {
+    const { contact } = await this.inventoryApi.put(
+      `/contacts/${contactId}`,
+      data,
+      {
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+    return contact;
+  }
+
+  async deleteCustomer(userContactId: string): Promise<any> {
+    return await this.inventoryApi.delete(`/contacts/${userContactId}`, {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   async uploadProductSpecs(
     productId: string,
     productUrl: string,
   ): Promise<any> {
     const payload = {
-      custom_fields: [{ label: 'product_specs', value: productUrl }],
+      custom_fields: [
+        { label: 'product_specs', value: productUrl },
+        { label: 'show_product_specs', value: true },
+      ],
     };
 
+    return await this.inventoryApi.put(
+      `/item/${productId}/customfields`,
+      payload,
+    );
+  }
+
+  async clearProductSpecs(productId: string): Promise<any> {
+    const payload = {
+      custom_fields: [{ label: 'show_product_specs', value: false }],
+    };
     return await this.inventoryApi.put(
       `/item/${productId}/customfields`,
       payload,
