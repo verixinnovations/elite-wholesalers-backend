@@ -49,14 +49,13 @@ export const emailTemplateBuilder = (
     ...data,
     pageHeading,
     body: bodyHtml,
-    brandUrl:
-      process.env.ELITE_WHOLESALERS_URL ?? 'https://verixinnovations.com',
+    brandUrl: 'https://elitewholesalers.com.au',
   });
 
   return {
     from:
       process.env.EMAIL_FROM ??
-      'Elite Wholesalers <support@verixinnovations.com>',
+      'Elite Wholesalers <support@elitewholesalers.com.au>',
     to: email,
     subject,
     html,
