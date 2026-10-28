@@ -87,7 +87,7 @@ export class ProductsController {
   async findOne(@Req() req: IRequest, @Param('id') id: string) {
     const product = await this.productsService.findOne(id);
     const productWithPrice = [product].map(
-      generatePriceByAccountType(req?.user?.accountType),
+      generatePriceByAccountType(req?.user?.accountType, 'selling_price'),
     );
     return productWithPrice[0];
   }

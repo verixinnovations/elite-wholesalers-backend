@@ -10,11 +10,13 @@ import type {
 } from './zoho-interface';
 import { ProductQueryDto } from '../products/dto/create-product.dto';
 import { CreateContactDto } from './dto/create-zoho-user.dto';
+import axios, { AxiosInstance } from 'axios';
 
 @Injectable()
 export class ZohoInventoryService {
   private readonly inventoryApi: ZohoApiClient;
   private readonly commerceApi: ZohoApiClient;
+  private readonly storeFrontApi: AxiosInstance;
 
   constructor(private readonly zohoService: ZohoService) {
     this.inventoryApi = this.zohoService.createClient(
@@ -26,6 +28,15 @@ export class ZohoInventoryService {
       '/store/api/v1',
       'CommerceAPI',
     );
+    this.storeFrontApi = axios.create({
+      baseURL: 'https://commerce.zoho.com/storefront/api/v1',
+      timeout: 10000,
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'domain-name': 'elitewholesalers.zohoecommerce.com',
+      },
+    });
   }
 
   async createCustomer(data: CreateContactDto): Promise<any> {
@@ -207,10 +218,18 @@ export class ZohoInventoryService {
   }
 
   async getInventoryItem(productId: string): Promise<ProductEntity> {
-    const data = await this.inventoryApi.get<{ item: ProductEntity }>(
-      `/items/${productId}`,
-    );
-    return data.item;
+    const [inventoryData, storeFrontData] = await Promise.all([
+      this.inventoryApi.get<{ item: ProductEntity }>(`/items/${productId}`),
+      this.storeFrontApi.get(`/products/${productId}`),
+    ]);
+
+    const product = inventoryData.item;
+    const shortDesc = storeFrontData?.data.payload?.product?.short_description;
+
+    if (product && shortDesc) {
+      product.description = shortDesc;
+    }
+    return product;
   }
 
   async getInventoryCategories(): Promise<CategoryEntity[]> {

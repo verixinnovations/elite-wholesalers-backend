@@ -62,7 +62,6 @@ export class ZohoService {
             'Missing ZOHO_COMMERCE_DOMAIN in environment variables.',
           );
         }
-        config.headers['domain-name'] = domainName;
       }
       return config;
     });

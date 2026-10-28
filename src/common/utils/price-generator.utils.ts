@@ -3,12 +3,14 @@ import { ProductEntity } from '../../modules/zoho/zoho-interface';
 import { Currency } from './numbers.utils';
 
 const generatePriceByAccountType =
-  (accountType: AccountType = AccountType.INDIVIDUAL) =>
+  (accountType: AccountType = AccountType.INDIVIDUAL, rate_field = 'rate') =>
   (item: ProductEntity) => ({
     ...item,
     price: {
       amount:
-        accountType === AccountType.INDIVIDUAL ? item.rate * 1.2 : item.rate,
+        accountType === AccountType.INDIVIDUAL
+          ? item[rate_field] * 1.2
+          : item.rate,
       currency: Currency.AUD,
     },
   });
