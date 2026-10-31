@@ -1,7 +1,7 @@
 import { NestFactory, Reflector } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
-import { AppModule } from './app.module';
+import { AppModule, ObserveInstrument } from './app.module';
 import {
   DocumentBuilder,
   SwaggerCustomOptions,
@@ -13,6 +13,7 @@ import {
   ClassSerializerInterceptor,
   ValidationPipe,
   Logger,
+  LoggerService,
 } from '@nestjs/common';
 import { ValidationError } from 'class-validator';
 import { ResponseInterceptor } from './common/interceptors/response.interceptors';
@@ -52,9 +53,17 @@ const swaggerOptions: SwaggerCustomOptions = {
   return this.toString();
 };
 
+export interface BootstrapOptions {
+  wrapLogger?: (logger: LoggerService) => LoggerService;
+}
+
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  app.setGlobalPrefix('api');
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    instrument: ObserveInstrument,
+  });
+  app.setGlobalPrefix('api', {
+    exclude: ['/status', '/socket.io'],
+  });
   app.enableCors();
 
   // {

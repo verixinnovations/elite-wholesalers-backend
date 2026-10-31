@@ -28,8 +28,17 @@ import { CartModule } from './modules/cart/cart.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { FirmwareModule } from './modules/firmware/firmware.module';
 
+import { createObserveModule } from '@nestjs/observe';
+
+export const { ObserveModule, ObserveInstrument } = createObserveModule();
+
 @Module({
   imports: [
+    ObserveModule.forRoot({
+      appKey: process.env.OBSERVE_APP_KEY,
+      appSecret: process.env.OBSERVE_APP_SECRET,
+      serviceId: 'elite-wholesalers',
+    }),
     ConfigModule.forRoot({ isGlobal: true }),
     PassportModule.register({ global: true }),
     DatabaseModule,
